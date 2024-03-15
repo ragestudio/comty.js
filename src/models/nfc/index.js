@@ -1,4 +1,4 @@
-import request from "../../handlers/request"
+import request from "../../request"
 
 export default class NFCModel {
     static async getOwnTags() {

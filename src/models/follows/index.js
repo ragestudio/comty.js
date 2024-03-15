@@ -1,5 +1,5 @@
 import { SessionModel } from "../../models"
-import request from "../../handlers/request"
+import request from "../../request"
 
 export default class FollowsModel {
     static imFollowing = async (user_id) => {

@@ -13,8 +13,19 @@ const envOrigins = {
 }
 
 export default {
-    default: {
-        origin: envOrigins[process.env.NODE_ENV ?? "production"],
-        hasWebsocket: false,
-    }
+    origin: envOrigins[process.env.NODE_ENV ?? "production"],
+    websockets: [
+        {
+            namespace: "posts",
+            path: "/posts",
+        },
+        {
+            namespace: "main",
+            path: "/main",
+        },
+        {
+            namespace: "notifications",
+            path: "/notifications",
+        }
+    ]
 }

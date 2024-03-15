@@ -4,6 +4,7 @@
     "main": "./dist/index.js",
     "author": "RageStudio <support@ragestudio.net>",
     "scripts": {
+        "test": "ava",
         "build": "hermes build"
     },
     "files": [
@@ -12,6 +13,7 @@
     "license": "MIT",
     "dependencies": {
         "@foxify/events": "^2.1.0",
+        "ava": "^6.1.2",
         "axios": "^1.4.0",
         "js-cookie": "^3.0.5",
         "jsonwebtoken": "^9.0.0",

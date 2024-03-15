@@ -1,5 +1,5 @@
 import jwt_decode from "jwt-decode"
-import request from "../../handlers/request"
+import request from "../../request"
 import Storage from "../../helpers/withStorage"
 
 export default class Session {

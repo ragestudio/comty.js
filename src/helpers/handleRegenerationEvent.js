@@ -1,5 +1,5 @@
 import SessionModel from "../models/session"
-import request from "../handlers/request"
+import request from "../request"
 import { reconnectWebsockets } from "../"
 
 export default async (refreshToken) => {

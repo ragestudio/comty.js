@@ -1,5 +1,5 @@
 import SessionModel from "../session"
-import request from "../../handlers/request"
+import request from "../../request"
 
 export default class User {
     static data = async (payload = {}) => {
@@ -33,7 +33,7 @@ export default class User {
     static updateData = async (payload) => {
         const response = await request({
             method: "POST",
-            url: "/users/self/update_data",
+            url: "/users/self/update",
             data: {
                 update: payload,
             },
@@ -43,12 +43,9 @@ export default class User {
     }
 
     static unsetFullName = async () => {
-        const response = await request({
-            method: "DELETE",
-            url: "/users/self/public_name",
+        return await User.updateData({
+            full_name: null,
         })
-
-        return response.data
     }
 
     static selfRoles = async () => {
@@ -82,21 +79,6 @@ export default class User {
         const { data } = await request({
             method: "GET",
             url: `/users/${user_id}/badges`,
-        })
-
-        return data
-    }
-
-    static changePassword = async (payload) => {
-        const { currentPassword, newPassword } = payload
-
-        const { data } = await request({
-            method: "POST",
-            url: "/user/self/update_password",
-            data: {
-                currentPassword,
-                newPassword,
-            }
         })
 
         return data
@@ -152,6 +134,40 @@ export default class User {
             params: {
                 email,
             }
+        })
+
+        return data
+    }
+
+    /**
+     * Retrive user config from server
+     *
+     * @param {type} key - A key of config
+     * @return {object} - Config object
+     */
+    static async getConfig(key) {
+        const { data } = await request({
+            method: "GET",
+            url: "/users/self/config",
+            params: {
+                key
+            }
+        })
+
+        return data
+    }
+
+    /**
+     * Update the configuration with the given update.
+     *
+     * @param {Object} update - The object containing the updated configuration data
+     * @return {Promise} A Promise that resolves with the response data after the configuration is updated
+     */
+    static async updateConfig(update) {
+        const { data } = await request({
+            method: "PUT",
+            url: "/users/self/config",
+            data: update
         })
 
         return data

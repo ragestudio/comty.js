@@ -4,12 +4,9 @@ import EventEmitter from "@foxify/events"
 import axios from "axios"
 import { io } from "socket.io-client"
 
-import remotes from "./remotes"
-
-import Storage from "./helpers/withStorage"
-
-import SessionModel from "./models/session"
 import { createHandlers } from "./models"
+import Storage from "./helpers/withStorage"
+import remote from "./remote"
 
 globalThis.isServerMode = typeof window === "undefined" && typeof global !== "undefined"
 
@@ -25,7 +22,11 @@ if (globalThis.isServerMode) {
 }
 
 export async function createWebsockets() {
-    const instances = globalThis.__comty_shared_state.wsInstances
+    if (!remote.websockets) {
+        return false
+    }
+
+    const instances = globalThis.__comty_shared_state.sockets
 
     for (let [key, instance] of Object.entries(instances)) {
         if (instance.connected) {
@@ -36,40 +37,31 @@ export async function createWebsockets() {
         // remove current listeners
         instance.removeAllListeners()
 
-        delete globalThis.__comty_shared_state.wsInstances[key]
+        delete globalThis.__comty_shared_state.sockets[key]
     }
 
-    for (let [key, remote] of Object.entries(remotes)) {
-        if (!remote.hasWebsocket) {
-            continue
-        }
-
+    for (let ws of remote.websockets) {
         let opts = {
             transports: ["websocket"],
-            autoConnect: remote.autoConnect ?? true,
-            ...remote.wsParams ?? {},
+            autoConnect: ws.autoConnect ?? true,
+            forceNew: true,
+            path: ws.path,
+            ...ws.params ?? {},
         }
 
-        if (remote.noAuth !== true) {
+        if (ws.noAuth !== true) {
             opts.auth = {
-                token: SessionModel.token,
+                token: Storage.engine.get("token"),
             }
         }
 
-        globalThis.__comty_shared_state.wsInstances[key] = io(remote.wsOrigin ?? remote.origin, opts)
+        globalThis.__comty_shared_state.sockets[ws.namespace] = io(remote.origin, opts)
     }
 
     // regsister events
     for (let [key, instance] of Object.entries(instances)) {
         instance.on("connect", () => {
             console.debug(`[WS-API][${key}] Connected`)
-
-            if (remotes[key].useClassicAuth && remotes[key].noAuth !== true) {
-                // try to auth
-                instance.emit("auth", {
-                    token: SessionModel.token,
-                })
-            }
 
             globalThis.__comty_shared_state.eventBus.emit(`${key}:connected`)
         })
@@ -95,7 +87,7 @@ export async function createWebsockets() {
 }
 
 export async function disconnectWebsockets() {
-    const instances = globalThis.__comty_shared_state.wsInstances
+    const instances = globalThis.__comty_shared_state.sockets
 
     for (let [key, instance] of Object.entries(instances)) {
         if (instance.connected) {
@@ -104,45 +96,24 @@ export async function disconnectWebsockets() {
     }
 }
 
-export async function reconnectWebsockets({ force = false } = {}) {
-    const instances = globalThis.__comty_shared_state.wsInstances
+export async function reconnectWebsockets() {
+    const instances = globalThis.__comty_shared_state.sockets
 
     for (let [key, instance] of Object.entries(instances)) {
         if (instance.connected) {
-            if (!instance.auth) {
-                instance.disconnect()
-
-                instance.auth = {
-                    token: SessionModel.token,
-                }
-
-                instance.connect()
-                continue
-            }
-
-            if (!force) {
-                instance.emit("reauthenticate", {
-                    token: SessionModel.token,
-                })
-
-                continue
-            }
-
             // disconnect first
             instance.disconnect()
         }
 
-        if (remotes[key].noAuth !== true) {
-            instance.auth = {
-                token: SessionModel.token,
-            }
+        instance.auth = {
+            token: Storage.engine.get("token"),
         }
 
         instance.connect()
     }
 }
 
-export default function createClient({
+export function createClient({
     accessKey = null,
     privateKey = null,
     enableWs = false,
@@ -151,46 +122,41 @@ export default function createClient({
         onExpiredExceptionEvent: false,
         excludedExpiredExceptionURL: ["/session/regenerate"],
         eventBus: new EventEmitter(),
-        mainOrigin: remotes.default.origin,
-        instances: Object(),
-        wsInstances: Object(),
+        mainOrigin: remote.origin,
+        baseRequest: null,
+        sockets: new Map(),
         rest: null,
         version: pkg.version,
     }
 
     sharedState.rest = createHandlers()
-    if (globalThis.isServerMode) {
-    }
 
     if (privateKey && accessKey && globalThis.isServerMode) {
         Storage.engine.set("token", `${accessKey}:${privateKey}`)
     }
 
-    // create instances for every remote
-    for (const [key, remote] of Object.entries(remotes)) {
-        sharedState.instances[key] = axios.create({
-            baseURL: remote.origin,
-            headers: {
-                "Content-Type": "application/json",
+    sharedState.baseRequest = axios.create({
+        baseURL: remote.origin,
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+
+    // create a interceptor to attach the token every request
+    sharedState.baseRequest.interceptors.request.use((config) => {
+        // check if current request has no Authorization header, if so, attach the token
+        if (!config.headers["Authorization"]) {
+            const sessionToken = Storage.engine.get("token")
+
+            if (sessionToken) {
+                config.headers["Authorization"] = `${globalThis.isServerMode ? "Server" : "Bearer"} ${sessionToken}`
+            } else {
+                console.warn("Making a request with no session token")
             }
-        })
+        }
 
-        // create a interceptor to attach the token every request
-        sharedState.instances[key].interceptors.request.use((config) => {
-            // check if current request has no Authorization header, if so, attach the token
-            if (!config.headers["Authorization"]) {
-                const sessionToken = SessionModel.token
-
-                if (sessionToken) {
-                    config.headers["Authorization"] = `${globalThis.isServerMode ? "Server" : "Bearer"} ${sessionToken}`
-                } else {
-                    console.warn("Making a request with no session token")
-                }
-            }
-
-            return config
-        })
-    }
+        return config
+    })
 
     if (enableWs) {
         createWebsockets()
@@ -198,3 +164,5 @@ export default function createClient({
 
     return sharedState
 }
+
+export default createClient

@@ -1,4 +1,4 @@
-import request from "../../handlers/request"
+import request from "../../request"
 import SessionModel from "../session"
 
 export default class AuthModel {
@@ -86,5 +86,39 @@ export default class AuthModel {
         }
 
         return response.data
+    }
+
+    static availability = async (payload) => {
+        const { username, email } = payload
+
+        const response = await request({
+            method: "get",
+            url: `/availability`,
+            data: {
+                username,
+                email,
+            }
+        }).catch((error) => {
+            console.error(error)
+
+            return false
+        })
+
+        return response.data
+    }
+
+    static changePassword = async (payload) => {
+        const { currentPassword, newPassword } = payload
+
+        const { data } = await request({
+            method: "put",
+            url: "/auth/password",
+            data: {
+                old_password: currentPassword,
+                new_password: newPassword,
+            }
+        })
+
+        return data
     }
 }

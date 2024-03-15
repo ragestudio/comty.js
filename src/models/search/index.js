@@ -1,4 +1,4 @@
-import request from "../../handlers/request"
+import request from "../../request"
 
 export default class Search {
     static search = async (keywords, params = {}) => {

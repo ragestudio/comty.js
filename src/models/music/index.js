@@ -1,4 +1,4 @@
-import request from "../../handlers/request"
+import request from "../../request"
 import pmap from "p-map"
 import SyncModel from "../sync"
 

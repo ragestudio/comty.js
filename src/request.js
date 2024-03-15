@@ -1,5 +1,5 @@
-import handleBeforeRequest from "../helpers/handleBeforeRequest"
-import handleAfterRequest from "../helpers/handleAfterRequest"
+import handleBeforeRequest from "./helpers/handleBeforeRequest"
+import handleAfterRequest from "./helpers/handleAfterRequest"
 
 export default async (
     request = {
@@ -7,7 +7,7 @@ export default async (
     },
     ...args
 ) => {
-    const instance = request.instance ?? __comty_shared_state.instances.default
+    const instance = request.instance ?? __comty_shared_state.baseRequest
 
     if (!instance) {
         throw new Error("No instance provided")

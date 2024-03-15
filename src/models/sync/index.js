@@ -1,7 +1,7 @@
 import spotifyService from "./services/spotify"
 import tidalService from "./services/tidal"
 
-import request from "../../handlers/request"
+import request from "../../request"
 
 const namespacesServices = {
     spotify: spotifyService,

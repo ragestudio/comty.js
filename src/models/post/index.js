@@ -1,4 +1,4 @@
-import request from "../../handlers/request"
+import request from "../../request"
 import Settings from "../../helpers/withSettings"
 
 export default class Post {
@@ -26,58 +26,20 @@ export default class Post {
 
         const { data } = await request({
             method: "GET",
-            url: `/posts/post/${post_id}`,
+            url: `/posts/${post_id}/data`,
         })
 
         return data
     }
 
-    static getPostComments = async ({ post_id }) => {
+    static async replies({ post_id, trim, limit }) {
         if (!post_id) {
             throw new Error("Post ID is required")
         }
 
         const { data } = await request({
             method: "GET",
-            url: `/comments/post/${post_id}`,
-        })
-
-        return data
-    }
-
-    static sendComment = async ({ post_id, comment }) => {
-        if (!post_id || !comment) {
-            throw new Error("Post ID and/or comment are required")
-        }
-
-        const { data } = await request({
-            method: "POST",
-            url: `/comments/post/${post_id}`,
-            data: {
-                message: comment,
-            },
-        })
-
-        return data
-    }
-
-    static deleteComment = async ({ post_id, comment_id }) => {
-        if (!post_id || !comment_id) {
-            throw new Error("Post ID and/or comment ID are required")
-        }
-
-        const { data } = await request({
-            method: "DELETE",
-            url: `/comments/post/${post_id}/${comment_id}`,
-        })
-
-        return data
-    }
-
-    static getExplorePosts = async ({ trim, limit }) => {
-        const { data } = await request({
-            method: "GET",
-            url: `/posts/explore`,
+            url: `/posts/${post_id}/replies`,
             params: {
                 trim: trim ?? 0,
                 limit: limit ?? Settings.get("feed_max_fetch"),
@@ -91,6 +53,19 @@ export default class Post {
         const { data } = await request({
             method: "GET",
             url: `/posts/saved`,
+            params: {
+                trim: trim ?? 0,
+                limit: limit ?? Settings.get("feed_max_fetch"),
+            }
+        })
+
+        return data
+    }
+
+    static getLikedPosts = async ({ trim, limit }) => {
+        const { data } = await request({
+            method: "GET",
+            url: `/posts/liked`,
             params: {
                 trim: trim ?? 0,
                 limit: limit ?? Settings.get("feed_max_fetch"),
@@ -149,6 +124,20 @@ export default class Post {
             method: "POST",
             url: `/posts/new`,
             data: payload,
+        })
+
+        return data
+    }
+
+    static update = async (post_id, update) => {
+        if (!post_id) {
+            throw new Error("Post ID is required")
+        }
+
+        const { data } = await request({
+            method: "PUT",
+            url: `/posts/${post_id}/update`,
+            data: update,
         })
 
         return data
