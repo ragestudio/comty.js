@@ -118,7 +118,7 @@ export default class User {
     static checkUsernameAvailability = async (username) => {
         const { data } = await request({
             method: "GET",
-            url: `/user/username_available`,
+            url: `/availability`,
             params: {
                 username,
             }
@@ -130,7 +130,7 @@ export default class User {
     static checkEmailAvailability = async (email) => {
         const { data } = await request({
             method: "GET",
-            url: `/user/email_available`,
+            url: `/availability`,
             params: {
                 email,
             }

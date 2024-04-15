@@ -2,60 +2,87 @@ import request from "../../request"
 import pmap from "p-map"
 import SyncModel from "../sync"
 
+import Getters from "./getters"
+
 export default class MusicModel {
-    static get api_instance() {
-        return globalThis.__comty_shared_state.instances["music"]
-    }
+    /**
+    * Performs a search based on the provided keywords, with optional parameters for limiting the number of results and pagination.
+    *
+    * @param {string} keywords - The keywords to search for.
+    * @param {object} options - An optional object containing additional parameters.
+    * @param {number} options.limit - The maximum number of results to return. Defaults to 5.
+    * @param {number} options.offset - The offset to start returning results from. Defaults to 0.
+    * @param {boolean} options.useTidal - Whether to use Tidal for the search. Defaults to false.
+    * @return {Promise<Object>} The search results.
+    */
+    public static search = Getters.search
 
     /**
-     * Retrieves the official featured playlists.
-     *
-     * @return {Promise<Object>} The data containing the featured playlists.
-     */
-    static async getFeaturedPlaylists() {
-        const response = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: "/featured/playlists",
-        })
-
-        return response.data
-    }
+    * Retrieves playlist items based on the provided parameters.
+    *
+    * @param {Object} options - The options object.
+    * @param {string} options.playlist_id - The ID of the playlist.
+    * @param {string} options.service - The service from which to retrieve the playlist items.
+    * @param {number} options.limit - The maximum number of items to retrieve.
+    * @param {number} options.offset - The number of items to skip before retrieving.
+    * @return {Promise<Object>} Playlist items data.
+    */
+    public static getPlaylistItems = Getters.PlaylistItems
 
     /**
-     * Retrieves track data for a given ID.
-     *
-     * @param {string} id - The ID of the track.
-     * @return {Promise<Object>} The track data.
-     */
-    static async getTrackData(id) {
-        const response = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: `/tracks/${id}/data`,
-        })
-
-        return response.data
-    }
+    * Retrieves playlist data based on the provided parameters.
+    *
+    * @param {Object} options - The options object.
+    * @param {string} options.playlist_id - The ID of the playlist.
+    * @param {string} options.service - The service to use.
+    * @param {number} options.limit - The maximum number of items to retrieve.
+    * @param {number} options.offset - The offset for pagination.
+    * @return {Promise<Object>} Playlist data.
+    */
+    public static getPlaylistData = Getters.PlaylistData
 
     /**
-     * Retrieves tracks data for the given track IDs.
-     *
-     * @param {Array} ids - An array of track IDs.
-     * @return {Promise<Object>} A promise that resolves to the tracks data.
-     */
-    static async getTracksData(ids) {
-        const response = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: `/tracks/many`,
-            params: {
-                ids,
-            }
-        })
+    * Retrieves releases based on the provided parameters.
+    *  If user_id is not provided, it will retrieve self authenticated user releases.
+    *
+    * @param {object} options - The options for retrieving releases.
+    * @param {string} options.user_id - The ID of the user.
+    * @param {string[]} options.keywords - The keywords to filter releases by.
+    * @param {number} options.limit - The maximum number of releases to retrieve.
+    * @param {number} options.offset - The offset for paginated results.
+    * @return {Promise<Object>} - A promise that resolves to the retrieved releases.
+    */
+    public static getReleases = Getters.releases
 
-        return response.data
-    }
+    /**
+    * Retrieves release data by ID.
+    *
+    * @param {number} id - The ID of the release.
+    * @return {Promise<Object>} The release data.
+    */
+    public static getReleaseData = Getters.releaseData
+
+    /**
+    * Retrieves track data for a given ID.
+    *
+    * @param {string} id - The ID of the track or multiple IDs separated by commas.
+    * @return {Promise<Object>} The track data.
+    */
+    public static getTrackData = Getters.trackData
+
+    /**
+    * Retrieves the official featured playlists.
+    *
+    * @return {Promise<Object>} The data containing the featured playlists.
+    */
+    public static getFeaturedPlaylists = Getters.featuredPlaylists
+
+
+
+    //!INCOMPLETE
+
+
+
 
     /**
      * Retrieves favorite tracks based on specified parameters.
@@ -78,9 +105,8 @@ export default class MusicModel {
         const requesters = [
             async () => {
                 let { data } = await request({
-                    instance: MusicModel.api_instance,
                     method: "GET",
-                    url: `/tracks/liked`,
+                    url: `/music/tracks/liked`,
                     params: {
                         limit: limitPerRequesters,
                         offset,
@@ -138,6 +164,8 @@ export default class MusicModel {
         }
     }
 
+
+
     /**
      * Retrieves favorite playlists based on the specified parameters.
      *
@@ -155,16 +183,7 @@ export default class MusicModel {
 
         const requesters = [
             async () => {
-                const { data } = await request({
-                    instance: MusicModel.api_instance,
-                    method: "GET",
-                    url: `/playlists/self`,
-                    params: {
-                        keywords,
-                    },
-                })
-
-                return data
+                return await MusicModel.getMyReleases(keywords)
             },
         ]
 
@@ -217,117 +236,9 @@ export default class MusicModel {
         }
     }
 
-    /**
-     * Retrieves playlist items based on the provided parameters.
-     *
-     * @param {Object} options - The options object.
-     * @param {string} options.playlist_id - The ID of the playlist.
-     * @param {string} options.service - The service from which to retrieve the playlist items.
-     * @param {number} options.limit - The maximum number of items to retrieve.
-     * @param {number} options.offset - The number of items to skip before retrieving.
-     * @return {Promise<Object>} Playlist items data.
-     */
-    static async getPlaylistItems({
-        playlist_id,
-        service,
 
-        limit,
-        offset,
-    }) {
-        if (service === "tidal") {
-            const result = await SyncModel.tidalCore.getPlaylistItems({
-                playlist_id,
 
-                limit,
-                offset,
 
-                resolve_items: true,
-            })
-
-            return result
-        }
-
-        const { data } = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: `/playlists/${playlist_id}/items`,
-            params: {
-                limit,
-                offset,
-            }
-        })
-
-        return data
-    }
-
-    /**
-     * Retrieves playlist data based on the provided parameters.
-     *
-     * @param {Object} options - The options object.
-     * @param {string} options.playlist_id - The ID of the playlist.
-     * @param {string} options.service - The service to use.
-     * @param {number} options.limit - The maximum number of items to retrieve.
-     * @param {number} options.offset - The offset for pagination.
-     * @return {Promise<Object>} Playlist data.
-     */
-    static async getPlaylistData({
-        playlist_id,
-        service,
-
-        limit,
-        offset,
-    }) {
-        if (service === "tidal") {
-            const result = await SyncModel.tidalCore.getPlaylistData({
-                playlist_id,
-
-                limit,
-                offset,
-
-                resolve_items: true,
-            })
-
-            return result
-        }
-
-        const { data } = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: `/playlists/${playlist_id}/data`,
-            params: {
-                limit,
-                offset,
-            }
-        })
-
-        return data
-    }
-
-    /**
-     * Performs a search based on the provided keywords, with optional parameters for limiting the number of results and pagination.
-     *
-     * @param {string} keywords - The keywords to search for.
-     * @param {object} options - An optional object containing additional parameters.
-     * @param {number} options.limit - The maximum number of results to return. Defaults to 5.
-     * @param {number} options.offset - The offset to start returning results from. Defaults to 0.
-     * @param {boolean} options.useTidal - Whether to use Tidal for the search. Defaults to false.
-     * @return {Promise<Object>} The search results.
-     */
-    static async search(keywords, { limit = 5, offset = 0, useTidal = false }) {
-        const { data } = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: `/search`,
-            params: {
-                keywords,
-                limit,
-                offset,
-                useTidal,
-            },
-        })
-
-        return data
-    }
 
     /**
      * Creates a new playlist.
@@ -337,7 +248,6 @@ export default class MusicModel {
      */
     static async newPlaylist(payload) {
         const { data } = await request({
-            instance: MusicModel.api_instance,
             method: "POST",
             url: `/playlists/new`,
             data: payload,
@@ -355,7 +265,6 @@ export default class MusicModel {
      */
     static async putPlaylistItem(playlist_id, item) {
         const response = await request({
-            instance: MusicModel.api_instance,
             method: "PUT",
             url: `/playlists/${playlist_id}/items`,
             data: item,
@@ -373,7 +282,6 @@ export default class MusicModel {
      */
     static async deletePlaylistItem(playlist_id, item_id) {
         const response = await request({
-            instance: MusicModel.api_instance,
             method: "DELETE",
             url: `/playlists/${playlist_id}/items/${item_id}`,
         })
@@ -389,7 +297,6 @@ export default class MusicModel {
      */
     static async deletePlaylist(playlist_id) {
         const response = await request({
-            instance: MusicModel.api_instance,
             method: "DELETE",
             url: `/playlists/${playlist_id}`,
         })
@@ -405,7 +312,6 @@ export default class MusicModel {
      */
     static async putRelease(payload) {
         const response = await request({
-            instance: MusicModel.api_instance,
             method: "PUT",
             url: `/releases/release`,
             data: payload
@@ -416,72 +322,6 @@ export default class MusicModel {
 
 
     /**
-     * Retrieves the releases associated with the authenticated user.
-     *
-     * @param {string} keywords - The keywords to filter the releases by.
-     * @return {Promise<Object>} A promise that resolves to the data of the releases.
-     */
-    static async getMyReleases(keywords) {
-        const response = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: `/releases/self`,
-            params: {
-                keywords,
-            }
-        })
-
-        return response.data
-    }
-
-
-    /**
-     * Retrieves releases based on the provided parameters.
-     *
-     * @param {object} options - The options for retrieving releases.
-     * @param {string} options.user_id - The ID of the user.
-     * @param {string[]} options.keywords - The keywords to filter releases by.
-     * @param {number} options.limit - The maximum number of releases to retrieve.
-     * @param {number} options.offset - The offset for paginated results.
-     * @return {Promise<Object>} - A promise that resolves to the retrieved releases.
-     */
-    static async getReleases({
-        user_id,
-        keywords,
-        limit = 50,
-        offset = 0,
-    }) {
-        const response = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: `/releases/user/${user_id}`,
-            params: {
-                keywords,
-                limit,
-                offset,
-            }
-        })
-
-        return response.data
-    }
-
-    /**
-     * Retrieves release data by ID.
-     *
-     * @param {number} id - The ID of the release.
-     * @return {Promise<Object>} The release data.
-     */
-    static async getReleaseData(id) {
-        const response = await request({
-            instance: MusicModel.api_instance,
-            method: "GET",
-            url: `/releases/${id}/data`
-        })
-
-        return response.data
-    }
-
-    /**
      * Deletes a release by its ID.
      *
      * @param {string} id - The ID of the release to delete.
@@ -489,7 +329,6 @@ export default class MusicModel {
      */
     static async deleteRelease(id) {
         const response = await request({
-            instance: MusicModel.api_instance,
             method: "DELETE",
             url: `/releases/${id}`
         })
@@ -510,7 +349,6 @@ export default class MusicModel {
         }
 
         const response = await request({
-            instance: MusicModel.api_instance,
             method: "POST",
             url: `/tracks/${track_id}/refresh-cache`,
         })
@@ -546,7 +384,6 @@ export default class MusicModel {
             }
             default: {
                 const response = await request({
-                    instance: MusicModel.api_instance,
                     method: to ? "POST" : "DELETE",
                     url: `/tracks/${track_id}/like`,
                     params: {

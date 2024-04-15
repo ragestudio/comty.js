@@ -48,15 +48,16 @@ export default class AuthModel {
     }
 
     static register = async (payload) => {
-        const { username, password, email } = payload
+        const { username, password, email, tos } = payload
 
         const response = await request({
             method: "post",
-            url: "/auth/register",
+            url: "/register",
             data: {
                 username,
                 password,
                 email,
+                accept_tos: tos,
             }
         }).catch((error) => {
             console.error(error)

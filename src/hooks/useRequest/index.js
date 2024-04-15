@@ -1,14 +1,13 @@
 import React from "react"
 
 export default (method, ...args) => {
-    if (typeof method !== "function") {
-        throw new Error("useRequest: method must be a function")
-    }
-
     const [loading, setLoading] = React.useState(true)
     const [result, setResult] = React.useState(null)
     const [error, setError] = React.useState(null)
 
+    if (typeof method !== "function") {
+        return [() => {}, null, new Error("Method is not a function"), () => {}]
+    }
     const makeRequest = (...newArgs) => {
         method(...newArgs)
             .then((data) => {
