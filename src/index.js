@@ -113,14 +113,30 @@ export async function reconnectWebsockets() {
     }
 }
 
+export async function reauthenticateWebsockets() {
+    const instances = globalThis.__comty_shared_state.sockets
+
+    for (let [key, instance] of Object.entries(instances)) {
+        const token = Storage.engine.get("token")
+
+        instance.auth = {
+            token: token,
+        }
+
+        if (!instance.connected) {
+            instance.connect()
+        } else {
+            instance.emit("auth:reauth", token)
+        }
+    }
+}
+
 export function createClient({
     accessKey = null,
     privateKey = null,
     enableWs = false,
 } = {}) {
     const sharedState = globalThis.__comty_shared_state = {
-        onExpiredExceptionEvent: false,
-        excludedExpiredExceptionURL: ["/session/regenerate"],
         eventBus: new EventEmitter(),
         mainOrigin: remote.origin,
         baseRequest: null,

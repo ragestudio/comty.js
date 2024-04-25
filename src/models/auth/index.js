@@ -29,6 +29,7 @@ export default class AuthModel {
         }
 
         SessionModel.token = response.data.token
+        SessionModel.refreshToken = response.data.refreshToken
 
         if (typeof callback === "function") {
             await callback()
@@ -95,7 +96,7 @@ export default class AuthModel {
         const response = await request({
             method: "get",
             url: `/availability`,
-            data: {
+            params: {
                 username,
                 email,
             }

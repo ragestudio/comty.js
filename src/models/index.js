@@ -1,7 +1,6 @@
 import AuthModel from "./auth"
 import FeedModel from "./feed"
 import FollowsModel from "./follows"
-import LivestreamModel from "./livestream"
 import PostModel from "./post"
 import SessionModel from "./session"
 import SyncModel from "./sync"
@@ -20,7 +19,6 @@ function createHandlers() {
         auth: getEndpointsFromModel(AuthModel),
         feed: getEndpointsFromModel(FeedModel),
         follows: getEndpointsFromModel(FollowsModel),
-        livestream: getEndpointsFromModel(LivestreamModel),
         post: getEndpointsFromModel(PostModel),
         session: getEndpointsFromModel(SessionModel),
         sync: getEndpointsFromModel(SyncModel),
@@ -32,7 +30,6 @@ export {
     AuthModel,
     FeedModel,
     FollowsModel,
-    LivestreamModel,
     PostModel,
     SessionModel,
     SyncModel,

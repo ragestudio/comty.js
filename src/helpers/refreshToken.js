@@ -1,0 +1,36 @@
+import SessionModel from "../models/session"
+import { reauthenticateWebsockets } from ".."
+export default async () => {
+    __comty_shared_state.eventBus.emit("session:refreshing")
+    __comty_shared_state.refreshingToken = true
+
+    // send request to regenerate token
+    const response = await __comty_shared_state.baseRequest({
+        method: "POST",
+        url: "/auth",
+        data: {
+            authToken: await SessionModel.token,
+            refreshToken: await SessionModel.refreshToken,
+        }
+    })
+
+    if (!response) {
+        throw new Error("Failed to regenerate token, invalid server response.")
+    }
+
+    if (!response.data?.token) {
+        throw new Error("Failed to regenerate token, invalid server response.")
+    }
+
+    // set new token
+    SessionModel.token = response.data.token
+    SessionModel.refreshToken = response.data.refreshToken
+
+    // emit event
+    __comty_shared_state.eventBus.emit("session:refreshed")
+    __comty_shared_state.refreshingToken = false
+
+    reauthenticateWebsockets()
+
+    return true
+}

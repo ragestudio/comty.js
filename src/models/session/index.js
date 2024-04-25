@@ -4,6 +4,7 @@ import Storage from "../../helpers/withStorage"
 
 export default class Session {
     static storageTokenKey = "token"
+    static storageRefreshTokenKey = "refreshToken"
 
     static get token() {
         return Storage.engine.get(this.storageTokenKey)
@@ -11,6 +12,14 @@ export default class Session {
 
     static set token(token) {
         return Storage.engine.set(this.storageTokenKey, token)
+    }
+
+    static get refreshToken() {
+        return Storage.engine.get(this.storageRefreshTokenKey)
+    }
+
+    static set refreshToken(token) {
+        return Storage.engine.set(this.storageRefreshTokenKey, token)
     }
 
     static get roles() {
