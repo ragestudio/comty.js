@@ -13,7 +13,7 @@ export default class FeedModel {
     static async getMusicFeed({ trim, limit } = {}) {
         const { data } = await request({
             method: "GET",
-            url: `/feed/music`,
+            url: `/music/feed/my`,
             params: {
                 trim: trim ?? 0,
                 limit: limit ?? Settings.get("feed_max_fetch"),
@@ -34,7 +34,7 @@ export default class FeedModel {
     static async getGlobalMusicFeed({ trim, limit } = {}) {
         const { data } = await request({
             method: "GET",
-            url: `/music/feed/global`,
+            url: `/music/feed`,
             params: {
                 trim: trim ?? 0,
                 limit: limit ?? Settings.get("feed_max_fetch"),
