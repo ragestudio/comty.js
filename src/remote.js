@@ -26,6 +26,10 @@ export default {
         {
             namespace: "notifications",
             path: "/notifications",
+        },
+        {
+            namespace: "chats",
+            path: "/chats",
         }
     ]
 }
