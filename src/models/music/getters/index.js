@@ -17,7 +17,7 @@ async function exportObjs() {
         return fns
     } else {
         let objs = {}
-        
+
         const dirs = fs.readdirSync(__dirname).filter(file => file !== "index.js")
 
         const fs = require("fs")

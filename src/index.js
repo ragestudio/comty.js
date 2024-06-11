@@ -61,25 +61,33 @@ export async function createWebsockets() {
     // regsister events
     for (let [key, instance] of Object.entries(instances)) {
         instance.on("connect", () => {
-            console.debug(`[WS-API][${key}] Connected`)
+            //console.debug(`[WS-API][${key}] Connected`)
 
             globalThis.__comty_shared_state.eventBus.emit(`${key}:connected`)
         })
 
         instance.on("disconnect", () => {
-            console.debug(`[WS-API][${key}] Disconnected`)
+            //console.debug(`[WS-API][${key}] Disconnected`)
 
             globalThis.__comty_shared_state.eventBus.emit(`${key}:disconnected`)
         })
 
+        instance.on("reconnect", () => {
+            // console.debug(`[WS-API][${key}] Reconnected`)
+
+            globalThis.__comty_shared_state.eventBus.emit(`${key}:reconnected`)
+
+            reauthenticateWebsockets()
+        })
+
         instance.on("error", (error) => {
-            console.error(`[WS-API][${key}] Error`, error)
+            //console.error(`[WS-API][${key}] Error`, error)
 
             globalThis.__comty_shared_state.eventBus.emit(`${key}:error`, error)
         })
 
         instance.onAny((event, ...args) => {
-            console.debug(`[WS-API][${key}] Event (${event})`, ...args)
+            //console.debug(`[WS-API][${key}] Event (${event})`, ...args)
 
             globalThis.__comty_shared_state.eventBus.emit(`${key}:${event}`, ...args)
         })

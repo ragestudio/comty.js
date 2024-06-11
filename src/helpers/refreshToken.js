@@ -12,13 +12,19 @@ export default async () => {
             authToken: await SessionModel.token,
             refreshToken: await SessionModel.refreshToken,
         }
+    }).catch((error) => {
+        return false
     })
 
     if (!response) {
-        throw new Error("Failed to regenerate token, invalid server response.")
+        __comty_shared_state.refreshingToken = false
+
+        throw new Error("Failed to regenerate token.")
     }
 
     if (!response.data?.token) {
+        __comty_shared_state.refreshingToken = false
+
         throw new Error("Failed to regenerate token, invalid server response.")
     }
 

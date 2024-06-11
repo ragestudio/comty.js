@@ -6,8 +6,16 @@ function getCurrentHostname() {
     return window?.location?.hostname ?? "localhost"
 }
 
+function getCurrentProtocol() {
+    if (typeof window === "undefined") {
+        return "http"
+    }
+
+    return window?.location?.protocol ?? "http:"
+}
+
 const envOrigins = {
-    "development": `http://${getCurrentHostname()}:9000`,
+    "development": `${getCurrentProtocol()}//${getCurrentHostname()}:9000`,
     "indev": "https://indev_api.comty.app",
     "production": "https://api.comty.app",
 }

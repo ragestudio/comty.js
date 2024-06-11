@@ -55,6 +55,16 @@ export default class MusicModel {
     public static getReleases = Getters.releases
 
     /**
+    * Retrieves self releases.
+    *
+    * @param {object} options - The options for retrieving my releases.
+    * @param {number} options.limit - The maximum number of releases to retrieve.
+    * @param {number} options.offset - The offset for paginated results.
+    * @return {Promise<Object>} - A promise that resolves to the retrieved releases.
+    */
+    public static getMyReleases = Getters.myReleases
+
+    /**
     * Retrieves release data by ID.
     *
     * @param {number} id - The ID of the release.
@@ -76,6 +86,14 @@ export default class MusicModel {
     * @return {Promise<Object>} The data containing the featured playlists.
     */
     public static getFeaturedPlaylists = Getters.featuredPlaylists
+
+    /**
+    * Retrieves track lyrics for a given ID.
+    *
+    * @param {string} id - The ID of the track.
+    * @return {Promise<Object>} The track lyrics.
+    */
+    public static getTrackLyrics = Getters.trackLyrics
 
 
 
