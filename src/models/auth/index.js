@@ -2,15 +2,18 @@ import request from "../../request"
 import SessionModel from "../session"
 
 export default class AuthModel {
-    static login = async (payload, callback) => {
+    /**
+     * Async function to handle the login process.
+     *
+     * @param {Object} payload - The payload containing username, password, and MFA code.
+     * @param {Function} callback - Optional callback function to handle further actions.
+     * @return {Object|boolean} The response data if login successful, false if MFA is required.
+     */
+    static async login(payload, callback) {
         const response = await request({
             method: "post",
             url: "/auth",
-            data: {
-                username: payload.username,
-                password: payload.password,
-                mfa_code: payload.mfa_code,
-            },
+            data: payload,
         })
 
         if (response.data.mfa_required) {
@@ -40,7 +43,12 @@ export default class AuthModel {
         return response.data
     }
 
-    static logout = async () => {
+    /**
+    * Asynchronously logs out the user by destroying the current session and emitting an event for successful logout.
+    *
+    * @return {Promise<void>} A Promise that resolves after the logout process is completed.
+    */
+    static async logout() {
         await SessionModel.destroyCurrentSession()
 
         SessionModel.removeToken()
@@ -48,7 +56,18 @@ export default class AuthModel {
         __comty_shared_state.eventBus.emit("auth:logout_success")
     }
 
-    static register = async (payload) => {
+    /**
+     * Registers a new user with the provided payload.
+     *
+     * @param {Object} payload - The payload containing the user's information.
+     * @param {string} payload.username - The username of the user.
+     * @param {string} payload.password - The password of the user.
+     * @param {string} payload.email - The email of the user.
+     * @param {boolean} payload.tos - The acceptance of the terms of service.
+     * @return {Promise<Object>} A Promise that resolves with the response data if the registration is successful, or false if there was an error.
+     * @throws {Error} Throws an error if the registration fails.
+     */
+    static async register(payload) {
         const { username, password, email, tos } = payload
 
         const response = await request({
@@ -73,7 +92,14 @@ export default class AuthModel {
         return response
     }
 
-    static usernameValidation = async (username) => {
+    /**
+     * Validates the existence of a username by making a GET request to the `/auth/{username}/exists` endpoint.
+     *
+     * @param {string} username - The username to validate.
+     * @return {Promise<boolean|Object>} A Promise that resolves with the response data if the validation is successful,
+     * or false if there was an error. Throws an error if the validation fails.
+     */
+    static async usernameValidation(username) {
         const response = await request({
             method: "get",
             url: `/auth/${username}/exists`,
@@ -90,7 +116,15 @@ export default class AuthModel {
         return response.data
     }
 
-    static availability = async (payload) => {
+    /**
+    * Retrieves the availability of a username and email by making a GET request to the `/availability` endpoint.
+    *
+    * @param {Object} payload - The payload containing the username and email.
+    * @param {string} payload.username - The username to check availability for.
+    * @param {string} payload.email - The email to check availability for.
+    * @return {Promise<Object|boolean>} A Promise that resolves with the availability data if successful, or false if an error occurred.
+    */
+    static async availability(payload) {
         const { username, email } = payload
 
         const response = await request({
@@ -109,7 +143,15 @@ export default class AuthModel {
         return response.data
     }
 
-    static changePassword = async (payload) => {
+    /**
+    * A function to change the user's password.
+    *
+    * @param {Object} payload - An object containing the currentPassword and newPassword.
+    * @param {string} payload.currentPassword - The current password of the user.
+    * @param {string} payload.newPassword - The new password to set for the user.
+    * @return {Promise<Object>} The data response after changing the password.
+    */
+    static async changePassword(payload) {
         const { currentPassword, newPassword } = payload
 
         const { data } = await request({

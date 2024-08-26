@@ -2,7 +2,14 @@ import { SessionModel } from "../../models"
 import request from "../../request"
 
 export default class FollowsModel {
-    static imFollowing = async (user_id) => {
+    /**
+     * Checks if the current user is following the specified user.
+     *
+     * @param {string} user_id - The ID of the user to check if the current user is following.
+     * @return {Promise<Object>} A promise that resolves with the response data indicating if the current user is following the specified user.
+     * @throws {Error} If the user_id parameter is not provided.
+     */
+    static async imFollowing(user_id) {
         if (!user_id) {
             throw new Error("user_id is required")
         }
@@ -15,9 +22,15 @@ export default class FollowsModel {
         return response.data
     }
 
-    static getFollowers = async (user_id, fetchData) => {
+    /**
+     * Retrieves the list of followers for a given user.
+     *
+     * @param {string} user_id - The ID of the user. If not provided, the current user ID will be used.
+     * @param {boolean} fetchData - Whether to fetch additional data for each follower. Defaults to false.
+     * @return {Promise<Object>} A promise that resolves with the list of followers and their data.
+     */
+    static async getFollowers(user_id, fetchData) {
         if (!user_id) {
-            // set current user_id
             user_id = SessionModel.user_id
         }
 
@@ -32,7 +45,13 @@ export default class FollowsModel {
         return response.data
     }
 
-    static toggleFollow = async ({ user_id }) => {
+    /**
+     * Toggles the follow status for a user.
+     *
+     * @param {Object} user_id - The ID of the user to toggle follow status.
+     * @return {Promise} The response data after toggling follow status.
+     */
+    static async toggleFollow({ user_id }) {
         if (!user_id) {
             throw new Error("user_id is required")
         }

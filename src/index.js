@@ -21,6 +21,13 @@ if (globalThis.isServerMode) {
     }
 }
 
+/**
+ * Creates websockets by disconnecting and removing listeners from existing instances,
+ * then creating new instances for each websocket in the remote.websockets array.
+ * Registers event listeners for connection, disconnection, reconnection, error, and any other events.
+ *
+ * @return {Promise<void>} A promise that resolves when all websockets have been created and event listeners have been registered.
+ */
 export async function createWebsockets() {
     if (!remote.websockets) {
         return false
@@ -94,6 +101,11 @@ export async function createWebsockets() {
     }
 }
 
+/**
+ * Disconnects all websocket instances by calling the `disconnect` method on each instance.
+ *
+ * @return {Promise<void>} A promise that resolves when all websocket instances have been disconnected.
+ */
 export async function disconnectWebsockets() {
     const instances = globalThis.__comty_shared_state.sockets
 
@@ -104,6 +116,11 @@ export async function disconnectWebsockets() {
     }
 }
 
+/**
+ * Reconnects all websocket instances by disconnecting and reconnecting them with the current token.
+ *
+ * @return {Promise<void>} A promise that resolves when all websocket instances have been reconnected.
+ */
 export async function reconnectWebsockets() {
     const instances = globalThis.__comty_shared_state.sockets
 
@@ -121,6 +138,11 @@ export async function reconnectWebsockets() {
     }
 }
 
+/**
+ * Reauthenticates all websocket instances with the current token. If a websocket instance is not connected, it connects to the server. If it is connected, it emits an "auth:reauth" event with the current token.
+ *
+ * @return {Promise<void>} Promise that resolves when all websocket instances have been reauthenticated.
+ */
 export async function reauthenticateWebsockets() {
     const instances = globalThis.__comty_shared_state.sockets
 
@@ -139,14 +161,21 @@ export async function reauthenticateWebsockets() {
     }
 }
 
+/**
+ * Create a client with the specified access key, private key, and websocket enablement.
+ *
+ * @param {Object} options - Optional parameters for accessKey, privateKey, and enableWs
+ * @return {Object} sharedState - Object containing eventBus, mainOrigin, baseRequest, sockets, rest, and version
+ */
 export function createClient({
     accessKey = null,
     privateKey = null,
     enableWs = false,
+    origin = remote.origin,
 } = {}) {
     const sharedState = globalThis.__comty_shared_state = {
         eventBus: new EventEmitter(),
-        mainOrigin: remote.origin,
+        mainOrigin: origin,
         baseRequest: null,
         sockets: new Map(),
         rest: null,
@@ -160,7 +189,7 @@ export function createClient({
     }
 
     sharedState.baseRequest = axios.create({
-        baseURL: remote.origin,
+        baseURL: origin,
         headers: {
             "Content-Type": "application/json",
         }

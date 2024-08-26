@@ -1,7 +1,14 @@
 import request from "../../request"
 
 export default class Search {
-    static search = async (keywords, params = {}) => {
+    /**
+     * Performs a search using the provided keywords and optional parameters.
+     *
+     * @param {string} keywords - The keywords to search for.
+     * @param {Object} [params={}] - Optional parameters for the search.
+     * @return {Promise<Object>} A promise that resolves with the search results.
+     */
+    static async search(keywords, params = {}) {
         const { data } = await request({
             method: "GET",
             url: `/search`,
@@ -14,6 +21,12 @@ export default class Search {
         return data
     }
 
+    /**
+     * Performs a quick search using the provided parameters.
+     *
+     * @param {Object} params - The parameters for the search.
+     * @return {Promise<Object>} A promise that resolves with the search results data.
+     */
     static async quickSearch(params) {
         const response = await request({
             method: "GET",
