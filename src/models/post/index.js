@@ -254,4 +254,65 @@ export default class Post {
     }
 
     static deletePost = Post.delete
+
+    /**
+     * Votes for a poll with the given post ID and option ID.
+     *
+     * @param {Object} options - The options for voting.
+     * @param {string} options.post_id - The ID of the post to vote for.
+     * @param {string} options.option_id - The ID of the option to vote for.
+     * @throws {Error} If the post_id or option_id is not provided.
+     * @return {Promise<Object>} The response data after voting.
+     */
+    static async votePoll({ post_id, option_id }) {
+        if (!post_id) {
+            throw new Error("post_id is required")
+        }
+
+        if (!option_id) {
+            throw new Error("option_id is required")
+        }
+
+        const { data } = await request({
+            method: "POST",
+            url: `/posts/${post_id}/vote_poll/${option_id}`,
+        })
+
+        return data
+    }
+
+    /**
+     * Deletes a vote for a poll with the given post ID and option ID.
+     *
+     * @param {Object} options - The options for deleting a vote.
+     * @param {string} options.post_id - The ID of the post to delete the vote from.
+     * @param {string} options.option_id - The ID of the option to delete the vote from.
+     * @throws {Error} If the post_id or option_id is not provided.
+     * @return {Promise<Object>} The response data after deleting the vote.
+     */
+    static async deleteVotePoll({ post_id, option_id }) {
+        if (!post_id) {
+            throw new Error("post_id is required")
+        }
+
+        if (!option_id) {
+            throw new Error("option_id is required")
+        }
+
+        const { data } = await request({
+            method: "DELETE",
+            url: `/posts/${post_id}/vote_poll/${option_id}`,
+        })
+
+        return data
+    }
+
+    static async getTrendings() {
+        const { data } = await request({
+            method: "GET",
+            url: `/posts/trendings`,
+        })
+
+        return data
+    }
 }

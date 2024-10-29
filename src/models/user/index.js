@@ -48,9 +48,7 @@ export default class User {
         const response = await request({
             method: "POST",
             url: "/users/self/update",
-            data: {
-                update: payload,
-            },
+            data: payload,
         })
 
         return response.data

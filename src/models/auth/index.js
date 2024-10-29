@@ -51,7 +51,7 @@ export default class AuthModel {
     static async logout() {
         await SessionModel.destroyCurrentSession()
 
-        SessionModel.removeToken()
+        await SessionModel.removeToken()
 
         __comty_shared_state.eventBus.emit("auth:logout_success")
     }
@@ -90,6 +90,29 @@ export default class AuthModel {
         }
 
         return response
+    }
+
+    /**
+     * Verifies the given token and returns the user data associated with it.
+     *
+     * @param {string} [token] - The token to verify. If not provided, the stored token is used.
+     * @return {Promise<Object>} A Promise that resolves with the user data if the token is valid, or false if the token is invalid.
+     * @throws {Error} Throws an error if there was an issue with the request.
+     */
+    static async authToken(token) {
+        if (!token) {
+            token = await SessionModel.token
+        }
+
+        const response = await request({
+            method: "POST",
+            url: "/auth/token",
+            data: {
+                token: token
+            }
+        })
+
+        return response.data
     }
 
     /**
@@ -160,6 +183,46 @@ export default class AuthModel {
             data: {
                 old_password: currentPassword,
                 new_password: newPassword,
+            }
+        })
+
+        return data
+    }
+
+    /**
+     * Activates a user account using the provided activation code.
+     *
+     * @param {string} user_id - The ID of the user to activate.
+     * @param {string} code - The activation code sent to the user's email.
+     * @return {Promise<Object>} A promise that resolves with the response data after activation.
+     * @throws {Error} Throws an error if the activation process fails.
+     */
+    static async activateAccount(user_id, code) {
+        const { data } = await request({
+            method: "post",
+            url: "/auth/activate",
+            data: {
+                code: code,
+                user_id: user_id,
+            }
+        })
+
+        return data
+    }
+
+    /**
+     * Resends the activation code to the user.
+     *
+     * @return {Promise<Object>} A promise that resolves with the response data after sending the activation code.
+     * @throws {Error} Throws an error if the resend activation code process fails.
+     * @param user_id
+     */
+    static async resendActivationCode(user_id) {
+        const { data } = await request({
+            method: "post",
+            url: "/auth/resend-activation-code",
+            data: {
+                user_id: user_id,
             }
         })
 

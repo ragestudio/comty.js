@@ -71,10 +71,14 @@ export default class NFCModel {
             throw new Error("Payload is required")
         }
 
+        if (window) {
+            payload.origin = window.location.host
+        }
+
         const { data } = await request({
             method: "POST",
             url: `/nfc/tag/register/${serial}`,
-            data: payload
+            data: payload,
         })
 
         return data

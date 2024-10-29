@@ -120,25 +120,6 @@ export default class Session {
     }
 
     /**
-     * Retrieves the token validation data from the server.
-     *
-     * @return {Promise<Object>} The token validation data.
-     */
-    static async getTokenValidation() {
-        const session = await Session.token
-
-        const response = await request({
-            method: "get",
-            url: "/sessions/validate",
-            data: {
-                session: session
-            }
-        })
-
-        return response.data
-    }
-
-    /**
      * Destroys the current session by deleting it from the server.
      *
      * @return {Promise<Object>} The response data from the server after deleting the session.
