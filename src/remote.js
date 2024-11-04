@@ -1,5 +1,5 @@
 const envOrigins = {
-    "development": `${location.origin}/api`,
+    "development": `https://fr01.ragestudio.net:9000`,//`${location.origin}/api`,
     "indev": "https://indev.comty.app/api",
     "production": "https://api.comty.app",
 }

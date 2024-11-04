@@ -228,4 +228,20 @@ export default class AuthModel {
 
         return data
     }
+
+    static async disableAccount({ confirm = false } = {}) {
+        if (!confirm) {
+            console.error("In order to disable your account, you must confirm the action.")
+            return null
+        }
+
+        const { data } = await request({
+            method: "post",
+            url: "/auth/disable-account",
+        })
+
+        __comty_shared_state.eventBus.emit("auth:disabled_account")
+
+        return data
+    }
 }
