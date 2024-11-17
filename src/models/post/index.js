@@ -307,10 +307,37 @@ export default class Post {
         return data
     }
 
+    /**
+     * Retrieves the trending hashtags and their counts.
+     *
+     * @return {Promise<Object[]>} An array of objects with two properties: "hashtag" and "count".
+     */
     static async getTrendings() {
         const { data } = await request({
             method: "GET",
             url: `/posts/trendings`,
+        })
+
+        return data
+    }
+
+    /**
+     * Retrieves the trending posts for a specific hashtag with optional trimming and limiting.
+     *
+     * @param {Object} options - The options for retrieving trending posts.
+     * @param {string} options.trending - The hashtag to retrieve trending posts for.
+     * @param {number} [options.trim=0] - The number of characters to trim the post content.
+     * @param {number} [options.limit=Settings.get("feed_max_fetch")] - The maximum number of posts to fetch.
+     * @return {Promise<Object[]>} An array of posts that are trending for the given hashtag.
+     */
+    static async getTrending({ trending, trim, limit } = {}) {
+        const { data } = await request({
+            method: "GET",
+            url: `/posts/trending/${trending}`,
+            params: {
+                trim: trim ?? 0,
+                limit: limit ?? Settings.get("feed_max_fetch"),
+            }
         })
 
         return data
