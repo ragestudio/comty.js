@@ -1,4 +1,4 @@
-import { SessionModel } from "../../models"
+import SessionModel from "../../models/session"
 import request from "../../request"
 
 export default class FollowsModel {
