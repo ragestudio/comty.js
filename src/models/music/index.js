@@ -2,8 +2,8 @@ import Getters from "./getters"
 import Setters from "./setters"
 
 export default class MusicModel {
-    public static Getters = Getters
-    public static Setters = Setters
+    static Getters = Getters
+    static Setters = Setters
 
     /**
     * Performs a search based on the provided keywords, with optional parameters for limiting the number of results and pagination.
@@ -15,7 +15,7 @@ export default class MusicModel {
     * @param {boolean} options.useTidal - Whether to use Tidal for the search. Defaults to false.
     * @return {Promise<Object>} The search results.
     */
-    public static search = Getters.search
+    static search = Getters.search
 
     /**
     * Retrieves playlist items based on the provided parameters.
@@ -27,7 +27,7 @@ export default class MusicModel {
     * @param {number} options.offset - The number of items to skip before retrieving.
     * @return {Promise<Object>} Playlist items data.
     */
-    public static getPlaylistItems = Getters.PlaylistItems
+    static getPlaylistItems = Getters.PlaylistItems
 
     /**
     * Retrieves playlist data based on the provided parameters.
@@ -39,7 +39,7 @@ export default class MusicModel {
     * @param {number} options.offset - The offset for pagination.
     * @return {Promise<Object>} Playlist data.
     */
-    public static getPlaylistData = Getters.PlaylistData
+    static getPlaylistData = Getters.PlaylistData
 
     /**
     * Retrieves releases based on the provided parameters.
@@ -52,7 +52,7 @@ export default class MusicModel {
     * @param {number} options.offset - The offset for paginated results.
     * @return {Promise<Object>} - A promise that resolves to the retrieved releases.
     */
-    public static getReleases = Getters.releases
+    static getReleases = Getters.releases
 
     /**
     * Retrieves self releases.
@@ -62,7 +62,7 @@ export default class MusicModel {
     * @param {number} options.offset - The offset for paginated results.
     * @return {Promise<Object>} - A promise that resolves to the retrieved releases.
     */
-    public static getMyReleases = Getters.myReleases
+    static getMyReleases = Getters.myReleases
 
     /**
     * Retrieves release data by ID.
@@ -70,7 +70,7 @@ export default class MusicModel {
     * @param {number} id - The ID of the release.
     * @return {Promise<Object>} The release data.
     */
-    public static getReleaseData = Getters.releaseData
+    static getReleaseData = Getters.releaseData
 
     /**
     * Retrieves track data for a given ID.
@@ -78,14 +78,14 @@ export default class MusicModel {
     * @param {string} id - The ID of the track or multiple IDs separated by commas.
     * @return {Promise<Object>} The track data.
     */
-    public static getTrackData = Getters.trackData
+    static getTrackData = Getters.trackData
 
     /**
     * Retrieves the official featured playlists.
     *
     * @return {Promise<Object>} The data containing the featured playlists.
     */
-    public static getFeaturedPlaylists = Getters.featuredPlaylists
+    static getFeaturedPlaylists = Getters.featuredPlaylists
 
     /**
     * Retrieves track lyrics for a given ID.
@@ -93,10 +93,10 @@ export default class MusicModel {
     * @param {string} id - The ID of the track.
     * @return {Promise<Object>} The track lyrics.
     */
-    public static getTrackLyrics = Getters.trackLyrics
+    static getTrackLyrics = Getters.trackLyrics
 
 
-    public static putTrackLyrics = Setters.putTrackLyrics
+    static putTrackLyrics = Setters.putTrackLyrics
 
     /**
     * Create or modify a track.
@@ -104,7 +104,7 @@ export default class MusicModel {
     * @param {object} TrackManifest - The track manifest.
     * @return {Promise<Object>} The result track data.
     */
-    public static putTrack = Setters.putTrack
+    static putTrack = Setters.putTrack
 
     /**
     * Create or modify a release.
@@ -112,7 +112,7 @@ export default class MusicModel {
     * @param {object} ReleaseManifest - The release manifest.
     * @return {Promise<Object>} The result release data.
     */
-    public static putRelease = Setters.putRelease
+    static putRelease = Setters.putRelease
 
     /**
     * Deletes a release by its ID.
@@ -120,21 +120,21 @@ export default class MusicModel {
     * @param {string} id - The ID of the release to delete.
     * @return {Promise<Object>} - A Promise that resolves to the data returned by the API.
     */
-    public static deleteRelease = Setters.deleteRelease
+    static deleteRelease = Setters.deleteRelease
 
     /**
      * Retrieves the favourite tracks of the current user.
      * 
      * @return {Promise<Object>} The favorite tracks data.
      */
-    public static getFavouriteTracks = null
+    static getFavouriteTracks = null
 
     /**
      * Retrieves the favourite tracks/playlists/releases of the current user.
      *  
      * @return {Promise<Object>} The favorite playlists data.
      */
-    public static getFavouriteFolder = Getters.favouriteFolder
+    static getFavouriteFolder = Getters.favouriteFolder
 
     /**
      * Toggles the favourite status of a track, playlist or folder.
@@ -143,7 +143,9 @@ export default class MusicModel {
      * @throws {Error} If the track_id is not provided.
      * @return {Promise<Object>} The response data after toggling the favorite status.
      */
-    public static toggleItemFavourite = Setters.toggleItemFavourite
+    static toggleItemFavourite = Setters.toggleItemFavourite
 
-    public static isItemFavourited = Getters.isItemFavourited
+    static isItemFavourited = Getters.isItemFavourited
+
+    static getRecentyPlayed = Getters.recentlyPlayed
 }

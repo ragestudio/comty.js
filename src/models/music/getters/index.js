@@ -1,36 +1,33 @@
-async function exportObjs() {
-    if (window) {
-        let paths = {
-            ...import.meta.glob("./**.ts"),
-            ...import.meta.glob("./**.js"),
-        }
+function exportObjs() {
+	if (typeof window !== "undefined") {
+		const paths = {
+			...import.meta.glob("./**.ts", { eager: true, import: "default" }),
+			...import.meta.glob("./**.js", { eager: true, import: "default" }),
+		}
 
-        let fns = {}
+		return Object.entries(paths).reduce((acc, [path, module]) => {
+			const name = path
+				.split("/")
+				.pop()
+				.replace(/\.(ts|js)$/, "")
+			acc[name] = module
+			return acc
+		}, {})
+	} else {
+		const fs = require("fs")
+		const path = require("path")
 
-        for (const path in paths) {
-            const name = path.split("/").pop().replace(".ts", "").replace(".js", "")
-            const fn = await paths[path]()
-
-            fns[name] = fn.default
-        }
-
-        return fns
-    } else {
-        let objs = {}
-
-        const dirs = fs.readdirSync(__dirname).filter(file => file !== "index.js")
-
-        const fs = require("fs")
-        const path = require("path")
-
-        dirs.forEach((file) => {
-            const model = require(path.join(__dirname, file)).default
-
-            objs[file.replace(".js", "")] = model
-        })
-
-        return objs
-    }
+		return fs
+			.readdirSync(__dirname)
+			.filter((file) => file !== "index.js" && /\.js$/.test(file))
+			.reduce((acc, file) => {
+				const name = file.replace(/\.js$/, "")
+				acc[name] = require(path.join(__dirname, file)).default
+				return acc
+			}, {})
+	}
 }
 
-export default await exportObjs()
+const exportedObjs = exportObjs()
+
+export default exportedObjs
