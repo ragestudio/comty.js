@@ -1,27 +1,26 @@
 {
-    "name": "comty.js",
-    "version": "0.60.3",
-    "main": "./dist/index.js",
-    "author": "RageStudio <support@ragestudio.net>",
-    "scripts": {
-        "test": "ava",
-        "build": "hermes build"
-    },
-    "files": [
-        "dist"
-    ],
-    "license": "MIT",
-    "dependencies": {
-        "@foxify/events": "^2.1.0",
-        "ava": "^6.1.2",
-        "axios": "^1.4.0",
-        "js-cookie": "^3.0.5",
-        "jsonwebtoken": "^9.0.0",
-        "jwt-decode": "^3.1.2",
-        "luxon": "^3.3.0",
-        "socket.io-client": "^4.6.1"
-    },
-    "devDependencies": {
-        "@ragestudio/hermes": "^0.1.0"
-    }
+	"name": "comty.js",
+	"version": "0.62.0",
+	"main": "./dist/index.js",
+	"author": "RageStudio <support@ragestudio.net>",
+	"scripts": {
+		"build": "hermes build"
+	},
+	"files": [
+		"dist"
+	],
+	"license": "MIT",
+	"dependencies": {
+		"@foxify/events": "^2.1.0",
+		"axios": "^1.8.4",
+		"js-cookie": "^3.0.5",
+		"jsonwebtoken": "^9.0.0",
+		"jwt-decode": "^4.0.0",
+		"linebridge-client": "^1.0.0",
+		"luxon": "^3.6.0",
+		"socket.io-client": "^4.8.1"
+	},
+	"devDependencies": {
+		"@ragestudio/hermes": "^1.0.0"
+	}
 }
