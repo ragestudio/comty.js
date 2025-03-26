@@ -2,7 +2,8 @@ import Remotes from "./remotes"
 import Storage from "./helpers/withStorage"
 
 import { io } from "socket.io-client"
-import RTClient from "./rtclient"
+//import { RTEngineClient } from "linebridge-client"
+import { RTEngineClient } from "../../linebridge/client/src"
 
 class WebsocketManager {
 	sockets = new Map()
@@ -54,7 +55,7 @@ class WebsocketManager {
 			remote,
 		)
 
-		const client = new RTClient({
+		const client = new RTEngineClient({
 			url: `${Remotes.origin}/${remote.namespace}`,
 			token: Storage.engine.get("token"),
 		})
@@ -119,6 +120,10 @@ class WebsocketManager {
 					await this.connect(remote)
 				}
 			} catch (error) {
+				console.error(
+					`Failed to connect to [${remote.namespace}]:`,
+					error,
+				)
 				globalThis.__comty_shared_state.eventBus.emit(
 					`wsmanager:${remote.namespace}:error`,
 					error,

@@ -30,7 +30,10 @@ if (globalThis.isServerMode) {
 export function createClient({
 	accessKey = null,
 	privateKey = null,
-	enableWs = false,
+	ws = {
+		enable: false,
+		autoConnect: false,
+	},
 	origin = Remotes.origin,
 	eventBus = new EventEmitter(),
 } = {}) {
@@ -72,9 +75,14 @@ export function createClient({
 		return config
 	})
 
-	if (enableWs == true) {
-		__comty_shared_state.ws = new WebsocketManager()
-		sharedState.ws.connectAll()
+	if (typeof ws === "object") {
+		if (ws.enable === true) {
+			__comty_shared_state.ws = new WebsocketManager()
+
+			if (ws.autoConnect === true) {
+				sharedState.ws.connectAll()
+			}
+		}
 	}
 
 	return sharedState
