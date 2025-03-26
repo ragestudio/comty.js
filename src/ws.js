@@ -2,8 +2,8 @@ import Remotes from "./remotes"
 import Storage from "./helpers/withStorage"
 
 import { io } from "socket.io-client"
-//import { RTEngineClient } from "linebridge-client"
-import { RTEngineClient } from "../../linebridge/client/src"
+import { RTEngineClient } from "linebridge-client/src"
+//import { RTEngineClient } from "../../linebridge/client/src"
 
 class WebsocketManager {
 	sockets = new Map()
@@ -56,6 +56,7 @@ class WebsocketManager {
 		)
 
 		const client = new RTEngineClient({
+			refName: remote.namespace,
 			url: `${Remotes.origin}/${remote.namespace}`,
 			token: Storage.engine.get("token"),
 		})

@@ -1,6 +1,6 @@
 {
 	"name": "comty.js",
-	"version": "0.61.1",
+	"version": "0.62.0",
 	"main": "./dist/index.js",
 	"author": "RageStudio <support@ragestudio.net>",
 	"scripts": {
@@ -16,7 +16,7 @@
 		"js-cookie": "^3.0.5",
 		"jsonwebtoken": "^9.0.0",
 		"jwt-decode": "^4.0.0",
-		"linebridge-client": "^0.2.0",
+		"linebridge-client": "^1.0.0",
 		"luxon": "^3.6.0",
 		"socket.io-client": "^4.8.1"
 	},
