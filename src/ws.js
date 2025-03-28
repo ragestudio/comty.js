@@ -6,6 +6,10 @@ import { RTEngineClient } from "linebridge-client/src"
 //import { RTEngineClient } from "../../linebridge/client/src"
 
 class WebsocketManager {
+	constructor({ origin }) {
+		this.origin = origin
+	}
+
 	sockets = new Map()
 
 	async connect(remote) {
@@ -23,7 +27,7 @@ class WebsocketManager {
 			}
 		}
 
-		const socket = io(Remotes.origin, opts)
+		const socket = io(this.origin, opts)
 
 		socket.on("connect", () => {
 			globalThis.__comty_shared_state.eventBus.emit(
@@ -57,7 +61,7 @@ class WebsocketManager {
 
 		const client = new RTEngineClient({
 			refName: remote.namespace,
-			url: `${Remotes.origin}/${remote.namespace}`,
+			url: `${this.origin}/${remote.namespace}`,
 			token: Storage.engine.get("token"),
 		})
 

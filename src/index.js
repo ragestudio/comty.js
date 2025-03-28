@@ -77,7 +77,9 @@ export function createClient({
 
 	if (typeof ws === "object") {
 		if (ws.enable === true) {
-			__comty_shared_state.ws = new WebsocketManager()
+			__comty_shared_state.ws = new WebsocketManager({
+				origin: origin,
+			})
 
 			if (ws.autoConnect === true) {
 				sharedState.ws.connectAll()
