@@ -98,10 +98,10 @@ class WebsocketManager {
 			return null
 		}
 
-		if (
-			socket.connected === true &&
-			typeof socket.disconnect === "function"
-		) {
+		const isConnected =
+			socket.connected === true || socket.state?.connected === true
+
+		if (isConnected && typeof socket.disconnect === "function") {
 			await socket.disconnect()
 		}
 

@@ -1,8 +1,10 @@
 import axios from "axios"
-import SessionService from "../session"
-//import User from "comty.js/models/user"
+import SessionModel from "../session"
+import UserModel from "../user"
+import { RTEngineClient } from "linebridge-client/src"
+//import { RTEngineClient } from "../../../../linebridge/client/src"
 
-async function injectUserData(list) {
+async function injectUserDataOnList(list) {
 	if (!Array.isArray(list)) {
 		return list
 	}
@@ -11,7 +13,21 @@ async function injectUserData(list) {
 		return item.user_id
 	})
 
-	//const users = await User.data(user_ids.join(","))
+	let users = await UserModel.data({ user_id: user_ids.join(",") })
+
+	if (!Array.isArray(users)) {
+		users = [users]
+	}
+
+	const userMap = new Map(users.map((user) => [user._id, user]))
+
+	list = list.map((item) => {
+		const user = userMap.get(item.user_id)
+		return {
+			...item,
+			user: user,
+		}
+	})
 
 	return list
 }
@@ -28,9 +44,9 @@ export default class Streaming {
 			},
 		})
 
-		if (SessionService.token) {
+		if (SessionModel.token) {
 			baseInstance.defaults.headers.common["Authorization"] =
-				`Bearer ${SessionService.token}`
+				`Bearer ${SessionModel.token}`
 		}
 
 		return baseInstance
@@ -45,6 +61,19 @@ export default class Streaming {
 			...data,
 			hostname: Streaming.apiHostname,
 		}
+	}
+
+	static async getStream(stream_id) {
+		if (!stream_id) {
+			return null
+		}
+
+		const { data } = await Streaming.base({
+			method: "get",
+			url: `/streaming/${stream_id}`,
+		})
+
+		return data
 	}
 
 	static async getOwnProfiles() {
@@ -69,14 +98,11 @@ export default class Streaming {
 		return data
 	}
 
-	static async getStream({ profile_id }) {
-		if (!profile_id) {
-			return null
-		}
-
+	static async createOrUpdateProfile(update) {
 		const { data } = await Streaming.base({
-			method: "get",
-			url: `/streaming/${profile_id}`,
+			method: "put",
+			url: `/streaming/profiles/self`,
+			data: update,
 		})
 
 		return data
@@ -95,22 +121,7 @@ export default class Streaming {
 		return data
 	}
 
-	static async createOrUpdateStream(update) {
-		const { data } = await Streaming.base({
-			method: "put",
-			url: `/streaming/profiles/self`,
-			data: update,
-		})
-
-		return data
-	}
-
-	static async getConnectionStatus({ profile_id }) {
-		console.warn("getConnectionStatus() | Not implemented")
-		return false
-	}
-
-	static async getLivestreamsList({ limit, offset } = {}) {
+	static async list({ limit, offset } = {}) {
 		let { data } = await Streaming.base({
 			method: "get",
 			url: "/streaming/list",
@@ -120,17 +131,41 @@ export default class Streaming {
 			},
 		})
 
-		data = await injectUserData(data)
+		data = await injectUserDataOnList(data)
 
 		return data
 	}
 
-	static async getLivestreamData(livestream_id) {
-		const { data } = await Streaming.base({
-			method: "get",
-			url: `/streaming/${livestream_id}`,
+	static async createStreamWebsocket(stream_id, params = {}) {
+		if (!stream_id) {
+			console.error("stream_id is required")
+			return null
+		}
+
+		const client = new RTEngineClient({
+			...params,
+			url: Streaming.apiHostname,
+			token: SessionModel.token,
 		})
 
-		return data
+		client._destroy = client.destroy
+
+		client.destroy = () => {
+			client.emit("stream:leave", stream_id)
+
+			if (typeof client._destroy === "function") {
+				client._destroy()
+			}
+		}
+
+		client.requestState = async () => {
+			return await client.call("stream:state", stream_id)
+		}
+
+		client.on("connected", () => {
+			client.emit("stream:join", stream_id)
+		})
+
+		return client
 	}
 }
