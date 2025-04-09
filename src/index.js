@@ -67,8 +67,6 @@ export function createClient({
 			if (sessionToken) {
 				config.headers["Authorization"] =
 					`${globalThis.isServerMode ? "Server" : "Bearer"} ${sessionToken}`
-			} else {
-				console.warn("Making a request with no session token")
 			}
 		}
 
