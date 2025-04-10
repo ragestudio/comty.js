@@ -13,7 +13,10 @@ async function injectUserDataOnList(list) {
 		return item.user_id
 	})
 
-	let users = await UserModel.data({ user_id: user_ids.join(",") })
+	let users = await UserModel.data({
+		user_id: user_ids.join(","),
+		basic: true,
+	})
 
 	if (!Array.isArray(users)) {
 		users = [users]
