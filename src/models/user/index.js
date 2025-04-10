@@ -14,7 +14,15 @@ export default class User {
 		let { username, user_id, basic = false } = payload
 
 		if (!username && !user_id) {
-			user_id = SessionModel.user_id
+			const response = await request({
+				method: "GET",
+				url: `/users/self`,
+				params: {
+					basic,
+				},
+			})
+
+			return response.data
 		}
 
 		if (username && !user_id) {
@@ -128,6 +136,31 @@ export default class User {
 			method: "PUT",
 			url: "/users/self/config",
 			data: update,
+		})
+
+		return data
+	}
+
+	static async getPublicKey(user_id) {
+		if (!user_id) {
+			user_id = SessionModel.user_id
+		}
+
+		const { data } = await request({
+			method: "GET",
+			url: `/users/${user_id}/public-key`,
+		})
+
+		return data
+	}
+
+	static async updatePublicKey(public_key) {
+		const { data } = await request({
+			method: "PUT",
+			url: `/users/self/public-key`,
+			data: {
+				public_key: public_key,
+			},
 		})
 
 		return data

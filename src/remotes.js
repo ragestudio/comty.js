@@ -1,5 +1,7 @@
 const envOrigins = {
-	development: `https://fr01.ragestudio.net:9000`, //`${location.origin}/api`,
+	development: globalThis.isServerMode
+		? "http://localhost:9000"
+		: `${globalThis.location?.origin}/api`,
 	indev: "https://indev.comty.app/api",
 	production: "https://api.comty.app",
 }
@@ -12,25 +14,9 @@ export default {
 			path: "/posts",
 			ng: true,
 		},
-		{
-			namespace: "main",
-			path: "/main",
-		},
-		{
-			namespace: "notifications",
-			path: "/notifications",
-		},
-		{
-			namespace: "chats",
-			path: "/chats",
-		},
-		{
-			namespace: "music",
-			path: "/music",
-		},
 		// {
-		//     namespace: "payments",
-		//     path: "/payments",
-		// }
+		// 	namespace: "chats",
+		// 	path: "/chats",
+		// },
 	],
 }

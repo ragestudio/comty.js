@@ -31,15 +31,18 @@ const fetchers = {
 				resolve("failed")
 			}, 5000)
 
-			globalThis.__comty_shared_state.ws.sockets
-				.get("main")
-				.once("pong", () => {
-					failTimeout && clearTimeout(failTimeout)
+			const sockets = globalThis.__comty_shared_state.ws.sockets
+			let firstSocket = sockets.keys().next().value
 
-					resolve(Date.now() - start)
-				})
+			firstSocket = sockets.get(firstSocket)
 
-			globalThis.__comty_shared_state.ws.sockets.get("main").emit("ping")
+			firstSocket.once("pong", () => {
+				failTimeout && clearTimeout(failTimeout)
+
+				resolve(Date.now() - start)
+			})
+
+			firstSocket.emit("ping")
 		}),
 }
 
