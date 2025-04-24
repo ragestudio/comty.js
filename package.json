@@ -23,6 +23,6 @@
 		"socket.io-client": "^4.8.1"
 	},
 	"devDependencies": {
-		"@ragestudio/hermes": "^1.0.0"
+		"@ragestudio/hermes": "^1.0.1"
 	}
 }
