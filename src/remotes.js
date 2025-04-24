@@ -13,10 +13,6 @@ export default {
 			ng: true,
 		},
 		{
-			namespace: "main",
-			path: "/main",
-		},
-		{
 			namespace: "notifications",
 			path: "/notifications",
 		},
@@ -24,13 +20,5 @@ export default {
 			namespace: "chats",
 			path: "/chats",
 		},
-		{
-			namespace: "music",
-			path: "/music",
-		},
-		// {
-		//     namespace: "payments",
-		//     path: "/payments",
-		// }
 	],
 }
