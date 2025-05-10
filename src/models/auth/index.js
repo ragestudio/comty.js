@@ -35,7 +35,7 @@ export default class AuthModel {
 		SessionModel.refreshToken = response.data.refreshToken
 
 		if (typeof callback === "function") {
-			await callback()
+			await callback(response.data)
 		}
 
 		__comty_shared_state.eventBus.emit("auth:login_success")

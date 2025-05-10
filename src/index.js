@@ -42,7 +42,6 @@ export function createClient({
 		mainOrigin: origin,
 		baseRequest: null,
 		ws: null,
-		rest: null,
 		version: pkg.version,
 		addons: new AddonsManager(),
 	})

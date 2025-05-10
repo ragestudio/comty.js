@@ -1,8 +1,8 @@
 import axios from "axios"
+import { RTEngineClient } from "linebridge-client/src"
+
 import SessionModel from "../session"
 import UserModel from "../user"
-import { RTEngineClient } from "linebridge-client/src"
-//import { RTEngineClient } from "../../../../linebridge/client/src"
 
 async function injectUserDataOnList(list) {
 	if (!Array.isArray(list)) {
@@ -73,7 +73,7 @@ export default class Streaming {
 
 		const { data } = await Streaming.base({
 			method: "get",
-			url: `/streaming/${stream_id}`,
+			url: `/stream/${stream_id}/data`,
 		})
 
 		return data
@@ -81,37 +81,51 @@ export default class Streaming {
 
 	static async getOwnProfiles() {
 		const { data } = await Streaming.base({
-			method: "get",
+			method: "GET",
 			url: "/streaming/profiles/self",
 		})
 
 		return data
 	}
 
-	static async getProfile({ profile_id }) {
+	static async getProfile(profile_id) {
 		if (!profile_id) {
 			return null
 		}
 
 		const { data } = await Streaming.base({
-			method: "get",
+			method: "GET",
 			url: `/streaming/profiles/${profile_id}`,
 		})
 
 		return data
 	}
 
-	static async createOrUpdateProfile(update) {
+	static async createProfile(payload) {
 		const { data } = await Streaming.base({
-			method: "put",
-			url: `/streaming/profiles/self`,
+			method: "POST",
+			url: "/streaming/profiles/new",
+			data: payload,
+		})
+
+		return data
+	}
+
+	static async updateProfile(profile_id, update) {
+		if (!profile_id) {
+			return null
+		}
+
+		const { data } = await Streaming.base({
+			method: "PUT",
+			url: `/streaming/profiles/${profile_id}`,
 			data: update,
 		})
 
 		return data
 	}
 
-	static async deleteProfile({ profile_id }) {
+	static async deleteProfile(profile_id) {
 		if (!profile_id) {
 			return null
 		}
@@ -119,6 +133,36 @@ export default class Streaming {
 		const { data } = await Streaming.base({
 			method: "delete",
 			url: `/streaming/profiles/${profile_id}`,
+		})
+
+		return data
+	}
+
+	static async addRestreamToProfile(profileId, restreamData) {
+		if (!profileId) {
+			console.error("profileId is required to add a restream")
+			return null
+		}
+
+		const { data } = await Streaming.base({
+			method: "put",
+			url: `/streaming/profiles/${profileId}/restreams`,
+			data: restreamData,
+		})
+
+		return data
+	}
+
+	static async deleteRestreamFromProfile(profileId, restreamIndexData) {
+		if (!profileId) {
+			console.error("profileId is required to delete a restream")
+			return null
+		}
+
+		const { data } = await Streaming.base({
+			method: "delete",
+			url: `/streaming/profiles/${profileId}/restreams`,
+			data: restreamIndexData,
 		})
 
 		return data
@@ -145,11 +189,7 @@ export default class Streaming {
 			return null
 		}
 
-		const client = new RTEngineClient({
-			...params,
-			url: Streaming.apiHostname,
-			token: SessionModel.token,
-		})
+		const client = Streaming.createWebsocket(params)
 
 		client._destroy = client.destroy
 
@@ -167,6 +207,16 @@ export default class Streaming {
 
 		client.on("connected", () => {
 			client.emit("stream:join", stream_id)
+		})
+
+		return client
+	}
+
+	static createWebsocket(params = {}) {
+		const client = new RTEngineClient({
+			...params,
+			url: Streaming.apiHostname,
+			token: SessionModel.token,
 		})
 
 		return client
