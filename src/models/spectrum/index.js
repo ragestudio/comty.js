@@ -1,5 +1,7 @@
 import axios from "axios"
-import { RTEngineClient } from "linebridge-client/src"
+import request from "../../request"
+
+import { RTEngineClient } from "linebridge-client"
 
 import SessionModel from "../session"
 import UserModel from "../user"
@@ -36,34 +38,12 @@ async function injectUserDataOnList(list) {
 }
 
 export default class Streaming {
-	static apiHostname = "https://live.ragestudio.net"
-
-	static get base() {
-		const baseInstance = axios.create({
-			baseURL: Streaming.apiHostname,
-			headers: {
-				Accept: "application/json",
-				"ngrok-skip-browser-warning": "any",
-			},
-		})
-
-		if (SessionModel.token) {
-			baseInstance.defaults.headers.common["Authorization"] =
-				`Bearer ${SessionModel.token}`
+	static get baseUrl() {
+		if (process.env.NODE_ENV === "production") {
+			return "https://live.ragestudio.net"
 		}
 
-		return baseInstance
-	}
-
-	static async serverInfo() {
-		const { data } = await Streaming.base({
-			method: "get",
-		})
-
-		return {
-			...data,
-			hostname: Streaming.apiHostname,
-		}
+		return __comty_shared_state.baseRequest.defaults.baseURL + "/spectrum"
 	}
 
 	static async getStream(stream_id) {
@@ -71,7 +51,8 @@ export default class Streaming {
 			return null
 		}
 
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "get",
 			url: `/stream/${stream_id}/data`,
 		})
@@ -80,7 +61,8 @@ export default class Streaming {
 	}
 
 	static async getOwnProfiles() {
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "GET",
 			url: "/streaming/profiles/self",
 		})
@@ -93,7 +75,8 @@ export default class Streaming {
 			return null
 		}
 
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "GET",
 			url: `/streaming/profiles/${profile_id}`,
 		})
@@ -102,7 +85,8 @@ export default class Streaming {
 	}
 
 	static async createProfile(payload) {
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "POST",
 			url: "/streaming/profiles/new",
 			data: payload,
@@ -116,7 +100,8 @@ export default class Streaming {
 			return null
 		}
 
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "PUT",
 			url: `/streaming/profiles/${profile_id}`,
 			data: update,
@@ -130,7 +115,8 @@ export default class Streaming {
 			return null
 		}
 
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "delete",
 			url: `/streaming/profiles/${profile_id}`,
 		})
@@ -144,7 +130,8 @@ export default class Streaming {
 			return null
 		}
 
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "put",
 			url: `/streaming/profiles/${profileId}/restreams`,
 			data: restreamData,
@@ -159,7 +146,8 @@ export default class Streaming {
 			return null
 		}
 
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "delete",
 			url: `/streaming/profiles/${profileId}/restreams`,
 			data: restreamIndexData,
@@ -169,7 +157,8 @@ export default class Streaming {
 	}
 
 	static async list({ limit, offset } = {}) {
-		let { data } = await Streaming.base({
+		let { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "get",
 			url: "/streaming/list",
 			params: {
@@ -181,6 +170,16 @@ export default class Streaming {
 		data = await injectUserDataOnList(data)
 
 		return data
+	}
+
+	static createWebsocket(params = {}) {
+		const client = new RTEngineClient({
+			...params,
+			url: Streaming.baseUrl,
+			token: SessionModel.token,
+		})
+
+		return client
 	}
 
 	static async createStreamWebsocket(stream_id, params = {}) {
@@ -207,16 +206,6 @@ export default class Streaming {
 
 		client.on("connected", () => {
 			client.emit("stream:join", stream_id)
-		})
-
-		return client
-	}
-
-	static createWebsocket(params = {}) {
-		const client = new RTEngineClient({
-			...params,
-			url: Streaming.apiHostname,
-			token: SessionModel.token,
 		})
 
 		return client
