@@ -1,5 +1,5 @@
 const envOrigins = {
-	development: `${location.origin}/api`,
+	development: location ? `${location.origin}/api` : "http://localhost:9000",
 	indev: "https://indev.comty.app/api",
 	production: "https://api.comty.app",
 }
