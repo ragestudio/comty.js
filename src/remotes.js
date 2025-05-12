@@ -1,7 +1,7 @@
 const envOrigins = {
 	development: globalThis.isServerMode
 		? "http://localhost:9000"
-		: `${location.origin}/api`,
+		: `${globalThis.location?.origin}/api`,
 	indev: "https://indev.comty.app/api",
 	production: "https://api.comty.app",
 }
