@@ -1,7 +1,5 @@
-import axios from "axios"
-import request from "../../request"
-
 import { RTEngineClient } from "linebridge-client"
+import request from "../../request"
 
 import SessionModel from "../session"
 import UserModel from "../user"
