@@ -17,7 +17,7 @@ export default class Files {
 				)
 			}
 
-			await new Promise((resolve, reject) => {
+			const result = await new Promise((resolve, reject) => {
 				const uploadInstance = new FileUploadBrowser({
 					endpoint: Files.chunkUploadEndpoint,
 					splitChunkSize: 5 * 1024 * 1024,
@@ -49,10 +49,14 @@ export default class Files {
 
 				uploadInstance.start()
 			})
+
+			return result
 		} catch (error) {
 			if (typeof onError === "function") {
 				onError(file, error)
 			}
+
+			return null
 		}
 	}
 }
