@@ -1,6 +1,6 @@
 {
 	"name": "comty.js",
-	"version": "0.65.5",
+	"version": "0.66.0",
 	"main": "./dist/index.js",
 	"description": "Official Comty API for JavaScript",
 	"homepage": "https://github.com/ragestudio/comty.js",
