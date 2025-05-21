@@ -14,13 +14,9 @@ export default {
 			path: "/posts",
 			ng: true,
 		},
-		{
-			namespace: "notifications",
-			path: "/notifications",
-		},
-		{
-			namespace: "chats",
-			path: "/chats",
-		},
+		// {
+		// 	namespace: "chats",
+		// 	path: "/chats",
+		// },
 	],
 }
