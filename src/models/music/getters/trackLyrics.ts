@@ -1,29 +1,14 @@
 import request from "../../../request"
 
 type RequestOptions = {
-	preferTranslation?: Boolean
+	language?: String
 }
 
-type RequestParams = {
-	translate_lang?: String
-}
-
-export default async (
-	id: String,
-	options: RequestOptions = {
-		preferTranslation: false,
-	},
-) => {
-	const requestParams: RequestParams = Object()
-
-	if (options.preferTranslation) {
-		requestParams.translate_lang = app.cores.settings.get("app:language")
-	}
-
+export default async (id: String, options: RequestOptions = {}) => {
 	const response = await request({
 		method: "GET",
 		url: `/music/tracks/${id}/lyrics`,
-		params: requestParams,
+		params: options,
 	})
 
 	// @ts-ignore
