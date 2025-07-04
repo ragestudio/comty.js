@@ -1,29 +1,22 @@
 import request from "../../../request"
 
 type Arguments = {
-    keywords: String
-    user_id: String
-    limit: Number
-    offset: Number
+	user_id: String
+	limit: Number
+	page: Number
 }
 
-export default async ({
-    keywords,
-    user_id,
-    limit,
-    offset,
-}: Arguments) => {
-    const response = await request({
-        method: "GET",
-        url: "/music/releases",
-        params: {
-            keywords: keywords,
-            user_id: user_id,
-            limit: limit,
-            offset: offset,
-        }
-    })
+export default async ({ user_id, limit, page }: Arguments) => {
+	const response = await request({
+		method: "GET",
+		url: "/music/releases",
+		params: {
+			user_id: user_id,
+			limit: limit,
+			page: page,
+		},
+	})
 
-    // @ts-ignore
-    return response.data
+	// @ts-ignore
+	return response.data
 }

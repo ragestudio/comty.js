@@ -1,6 +1,6 @@
 {
 	"name": "comty.js",
-	"version": "0.63.1",
+	"version": "0.67.0",
 	"main": "./dist/index.js",
 	"description": "Official Comty API for JavaScript",
 	"homepage": "https://github.com/ragestudio/comty.js",
@@ -23,6 +23,6 @@
 		"socket.io-client": "^4.8.1"
 	},
 	"devDependencies": {
-		"@ragestudio/hermes": "^1.0.0"
+		"@ragestudio/hermes": "^1.0.1"
 	}
 }

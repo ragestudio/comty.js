@@ -1,8 +1,8 @@
-import axios from "axios"
+import { RTEngineClient } from "linebridge-client"
+import request from "../../request"
+
 import SessionModel from "../session"
 import UserModel from "../user"
-import { RTEngineClient } from "linebridge-client/src"
-//import { RTEngineClient } from "../../../../linebridge/client/src"
 
 async function injectUserDataOnList(list) {
 	if (!Array.isArray(list)) {
@@ -36,34 +36,12 @@ async function injectUserDataOnList(list) {
 }
 
 export default class Streaming {
-	static apiHostname = "https://live.ragestudio.net"
-
-	static get base() {
-		const baseInstance = axios.create({
-			baseURL: Streaming.apiHostname,
-			headers: {
-				Accept: "application/json",
-				"ngrok-skip-browser-warning": "any",
-			},
-		})
-
-		if (SessionModel.token) {
-			baseInstance.defaults.headers.common["Authorization"] =
-				`Bearer ${SessionModel.token}`
+	static get baseUrl() {
+		if (process.env.NODE_ENV === "production") {
+			return "https://live.ragestudio.net"
 		}
 
-		return baseInstance
-	}
-
-	static async serverInfo() {
-		const { data } = await Streaming.base({
-			method: "get",
-		})
-
-		return {
-			...data,
-			hostname: Streaming.apiHostname,
-		}
+		return __comty_shared_state.baseRequest.defaults.baseURL + "/spectrum"
 	}
 
 	static async getStream(stream_id) {
@@ -71,52 +49,72 @@ export default class Streaming {
 			return null
 		}
 
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "get",
-			url: `/streaming/${stream_id}`,
+			url: `/stream/${stream_id}/data`,
 		})
 
 		return data
 	}
 
 	static async getOwnProfiles() {
-		const { data } = await Streaming.base({
-			method: "get",
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
+			method: "GET",
 			url: "/streaming/profiles/self",
 		})
 
 		return data
 	}
 
-	static async getProfile({ profile_id }) {
+	static async getProfile(profile_id) {
 		if (!profile_id) {
 			return null
 		}
 
-		const { data } = await Streaming.base({
-			method: "get",
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
+			method: "GET",
 			url: `/streaming/profiles/${profile_id}`,
 		})
 
 		return data
 	}
 
-	static async createOrUpdateProfile(update) {
-		const { data } = await Streaming.base({
-			method: "put",
-			url: `/streaming/profiles/self`,
+	static async createProfile(payload) {
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
+			method: "POST",
+			url: "/streaming/profiles/new",
+			data: payload,
+		})
+
+		return data
+	}
+
+	static async updateProfile(profile_id, update) {
+		if (!profile_id) {
+			return null
+		}
+
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
+			method: "PUT",
+			url: `/streaming/profiles/${profile_id}`,
 			data: update,
 		})
 
 		return data
 	}
 
-	static async deleteProfile({ profile_id }) {
+	static async deleteProfile(profile_id) {
 		if (!profile_id) {
 			return null
 		}
 
-		const { data } = await Streaming.base({
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "delete",
 			url: `/streaming/profiles/${profile_id}`,
 		})
@@ -124,8 +122,41 @@ export default class Streaming {
 		return data
 	}
 
+	static async addRestreamToProfile(profileId, restreamData) {
+		if (!profileId) {
+			console.error("profileId is required to add a restream")
+			return null
+		}
+
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
+			method: "put",
+			url: `/streaming/profiles/${profileId}/restreams`,
+			data: restreamData,
+		})
+
+		return data
+	}
+
+	static async deleteRestreamFromProfile(profileId, restreamIndexData) {
+		if (!profileId) {
+			console.error("profileId is required to delete a restream")
+			return null
+		}
+
+		const { data } = await request({
+			baseURL: Streaming.baseUrl,
+			method: "delete",
+			url: `/streaming/profiles/${profileId}/restreams`,
+			data: restreamIndexData,
+		})
+
+		return data
+	}
+
 	static async list({ limit, offset } = {}) {
-		let { data } = await Streaming.base({
+		let { data } = await request({
+			baseURL: Streaming.baseUrl,
 			method: "get",
 			url: "/streaming/list",
 			params: {
@@ -139,17 +170,23 @@ export default class Streaming {
 		return data
 	}
 
+	static createWebsocket(params = {}) {
+		const client = new RTEngineClient({
+			...params,
+			url: Streaming.baseUrl,
+			token: SessionModel.token,
+		})
+
+		return client
+	}
+
 	static async createStreamWebsocket(stream_id, params = {}) {
 		if (!stream_id) {
 			console.error("stream_id is required")
 			return null
 		}
 
-		const client = new RTEngineClient({
-			...params,
-			url: Streaming.apiHostname,
-			token: SessionModel.token,
-		})
+		const client = Streaming.createWebsocket(params)
 
 		client._destroy = client.destroy
 
