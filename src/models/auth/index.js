@@ -64,20 +64,22 @@ export default class AuthModel {
 	 * @param {string} payload.password - The password of the user.
 	 * @param {string} payload.email - The email of the user.
 	 * @param {boolean} payload.tos - The acceptance of the terms of service.
+	 * @param {string} payload.captcha - The captcha token.
 	 * @return {Promise<Object>} A Promise that resolves with the response data if the registration is successful, or false if there was an error.
 	 * @throws {Error} Throws an error if the registration fails.
 	 */
 	static async register(payload) {
-		const { username, password, email, tos } = payload
+		const { username, password, email, tos, captcha } = payload
 
 		const response = await request({
 			method: "post",
 			url: "/register",
 			data: {
-				username,
-				password,
-				email,
+				username: username,
+				password: password,
+				email: email,
 				accept_tos: tos,
+				captcha: captcha,
 			},
 		}).catch((error) => {
 			console.error(error)
@@ -176,8 +178,7 @@ export default class AuthModel {
 	 * @return {Promise<Object>} The data response after changing the password.
 	 */
 	static async changePassword(payload) {
-		const { currentPassword, newPassword, code, verificationToken } =
-			payload
+		const { currentPassword, newPassword, code, verificationToken } = payload
 
 		const { data } = await request({
 			method: "put",
