@@ -165,4 +165,17 @@ export default class User {
 
 		return data
 	}
+
+	static async getAvatar(user_id) {
+		if (!user_id) {
+			user_id = SessionModel.user_id
+		}
+
+		const { data } = await request({
+			method: "GET",
+			url: `/users/${user_id}/avatar`,
+		})
+
+		return data
+	}
 }
