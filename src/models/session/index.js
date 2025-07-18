@@ -22,7 +22,11 @@ export default class Session {
 	 * @return {Promise<void>} A promise that resolves when the token is successfully set.
 	 */
 	static set token(token) {
-		return Storage.engine.set(this.storageTokenKey, token)
+		return Storage.engine.set(this.storageTokenKey, token, {
+			path: "/",
+			sameSite: "Strict",
+			expires: 1460,
+		})
 	}
 
 	/**
@@ -41,7 +45,11 @@ export default class Session {
 	 * @return {Promise<void>} A promise that resolves when the refresh token is successfully set.
 	 */
 	static set refreshToken(token) {
-		return Storage.engine.set(this.storageRefreshTokenKey, token)
+		return Storage.engine.set(this.storageRefreshTokenKey, token, {
+			path: "/",
+			sameSite: "Strict",
+			expires: 1460,
+		})
 	}
 
 	/**
