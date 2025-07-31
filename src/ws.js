@@ -100,8 +100,8 @@ class WebsocketManager {
 		const isConnected =
 			socket.connected === true || socket.state?.connected === true
 
-		if (isConnected && typeof socket.disconnect === "function") {
-			await socket.disconnect()
+		if (isConnected && typeof socket.destroy === "function") {
+			await socket.destroy()
 		}
 
 		if (typeof socket.removeAllListeners === "function") {
