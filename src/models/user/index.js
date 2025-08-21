@@ -178,4 +178,21 @@ export default class User {
 
 		return data
 	}
+
+	static async isUserConnected(user_id) {
+		if (!user_id) {
+			user_id = SessionModel.user_id
+		}
+
+		if (Array.isArray(user_id)) {
+			user_id = user_id.join(",")
+		}
+
+		const { data } = await request({
+			method: "GET",
+			url: `/users/${user_id}/is-connected`,
+		})
+
+		return data
+	}
 }
