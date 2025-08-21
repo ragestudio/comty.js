@@ -6,8 +6,9 @@ import modifyGroupMethod from "./methods/modifyGroup"
 import deleteGroupMethod from "./methods/deleteGroup"
 
 import getGroupMembersMethod from "./methods/getGroupMembers"
+import getGroupChannelsMethod from "./methods/getGroupChannels"
 
-import getChannelMethod from "./methods/getChannel"
+import getGroupChannelMethod from "./methods/getGroupChannel"
 import createChannelMethod from "./methods/createChannel"
 import modifyChannelMethod from "./methods/modifyChannel"
 import deleteChannelMethod from "./methods/deleteChannel"
@@ -25,13 +26,15 @@ export default class GroupsModel {
 	static delete = deleteGroupMethod
 
 	static members = {
-		get: getGroupMembersMethod,
+		list: getGroupMembersMethod,
+		//get: getGroupMemberMethod,
 		//add: addGroupMembersMethod,
 		//remove: removeGroupMembersMethod,
 	}
 
 	static channels = {
-		get: getChannelMethod,
+		list: getGroupChannelsMethod,
+		get: getGroupChannelMethod,
 		create: createChannelMethod,
 		modify: modifyChannelMethod,
 		delete: deleteChannelMethod,

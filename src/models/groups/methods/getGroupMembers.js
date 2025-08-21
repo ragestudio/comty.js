@@ -1,6 +1,6 @@
 import request from "../../../request"
 
-export default async (group_id, { limit = 50, page = 0 } = {}) => {
+export default async (group_id, { limit = 50, offset = null } = {}) => {
 	if (typeof group_id !== "string") {
 		throw new Error("group_id is required")
 	}
@@ -10,7 +10,7 @@ export default async (group_id, { limit = 50, page = 0 } = {}) => {
 		url: `/groups/${group_id}/members`,
 		params: {
 			limit: limit,
-			page: page,
+			offset: offset,
 		},
 	})
 
