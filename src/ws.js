@@ -1,8 +1,8 @@
 import Remotes from "./remotes"
 import Storage from "./helpers/withStorage"
 
-import { io } from "socket.io-client"
 import { RTEngineClient } from "linebridge-client"
+//import { RTEngineClient } from "../../linebridge/client/src"
 
 class WebsocketManager {
 	constructor({ origin }) {
@@ -12,52 +12,6 @@ class WebsocketManager {
 	sockets = new Map()
 
 	async connect(remote) {
-		let opts = {
-			transports: ["websocket"],
-			autoConnect: remote.autoConnect ?? true,
-			forceNew: true,
-			path: remote.path,
-			...(remote.params ?? {}),
-		}
-
-		if (remote.noAuth !== true) {
-			opts.auth = {
-				token: Storage.engine.get("token"),
-			}
-		}
-
-		const socket = io(this.origin, opts)
-
-		socket.on("connect", () => {
-			globalThis.__comty_shared_state.eventBus.emit(
-				`wsmanager:${remote.namespace}:connected`,
-			)
-		})
-
-		socket.on("disconnect", () => {
-			globalThis.__comty_shared_state.eventBus.emit(
-				`wsmanager:${remote.namespace}:disconnected`,
-			)
-		})
-
-		socket.on("error", (error) => {
-			globalThis.__comty_shared_state.eventBus.emit(
-				`wsmanager:${remote.namespace}:error`,
-				error,
-			)
-		})
-
-		this.sockets.set(remote.namespace, socket)
-
-		return socket
-	}
-
-	async connectNg(remote) {
-		console.warn(
-			`Creating experimental socket client, some features may not work as expected:`,
-			remote,
-		)
-
 		const client = new RTEngineClient({
 			refName: remote.namespace,
 			url: `${this.origin}/${remote.namespace}`,
@@ -118,11 +72,7 @@ class WebsocketManager {
 
 		for await (const remote of Remotes.websockets) {
 			try {
-				if (remote.ng === true) {
-					await this.connectNg(remote)
-				} else {
-					await this.connect(remote)
-				}
+				await this.connect(remote)
 			} catch (error) {
 				console.error(
 					`Failed to connect to [${remote.namespace}]:`,

@@ -10,13 +10,16 @@ export default {
 	origin: envOrigins[process.env.NODE_ENV ?? "production"],
 	websockets: [
 		{
+			namespace: "main",
+			path: "/main",
+		},
+		{
 			namespace: "posts",
 			path: "/posts",
-			ng: true,
 		},
-		// {
-		// 	namespace: "chats",
-		// 	path: "/chats",
-		// },
+		{
+			namespace: "chats",
+			path: "/chats",
+		},
 	],
 }
