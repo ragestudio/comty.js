@@ -1,19 +1,61 @@
 import React from "react"
 import ChatsModel from "../../models/chats"
 
+function setUsersOnMessages(data) {
+	const users = new Map(data.users.map((user) => [user._id, user]))
+
+	data.items = data.items.map((item) => {
+		item.user = users.get(item.user_id) ?? {
+			username: "unknown",
+			public_name: "Ghost",
+			unknown: true,
+		}
+
+		return item
+	})
+
+	return data
+}
+
 const ChatEvents = {
 	"channel:message:new": async (ctx, data) => {
-		console.log("channel:message:new", data)
-		ctx.setTimeline((prev) => [...prev, data])
+		console.debug("channel:message:new", data)
+
+		if (!ctx.pausedUpdates.current) {
+			ctx.setTimeline((prev) => [data, ...prev])
+			ctx.newestId.current = data._id
+		}
+
+		if (ctx.events) {
+			if (typeof ctx.events.onNewMessage === "function") {
+				await ctx.events.onNewMessage(data)
+			}
+		}
 	},
-	"channel:message:update": async (ctx, data) => {
-		console.log("channel:message:update", data)
+	"channel:message:updated": async (ctx, data) => {
+		console.debug("channel:message:updated", data)
+
+		if (ctx.events) {
+			if (typeof ctx.events.onUpdatedMessage === "function") {
+				await ctx.events.onUpdatedMessage(data)
+			}
+		}
 	},
-	"channel:message:delete": async (ctx, data) => {
-		console.log("channel:message:delete", data)
+	"channel:message:deleted": async (ctx, data) => {
+		console.debug("channel:message:deleted", data)
+
+		ctx.setTimeline((prev) =>
+			prev.filter((message) => message._id !== data._id),
+		)
+
+		if (ctx.events) {
+			if (typeof ctx.events.onDeletedMessage === "function") {
+				await ctx.events.onDeletedMessage(data)
+			}
+		}
 	},
 	"channel:typing": async (ctx, data) => {
-		console.log("channel:typing", data)
+		console.debug("channel:typing", data)
 
 		ctx.setUsersTyping((prev) => {
 			if (data.isTyping) {
@@ -30,16 +72,19 @@ const ChatEvents = {
 	},
 }
 
-function useChannelChat(group_id, channel_id) {
+function useChannelChat(group_id, channel_id, events) {
 	const wssocket = React.useRef(
 		globalThis.__comty_shared_state.ws.sockets.get("chats"),
 	)
 	const oldestId = React.useRef(null)
+	const newestId = React.useRef(null)
 	const typingTimeout = React.useRef(null)
+	const pausedUpdates = React.useRef(false)
 
 	const [initialLoading, setInitialLoading] = React.useState(true)
 	const [loading, setLoading] = React.useState(false)
 
+	const [hasMore, setHasMore] = React.useState(true)
 	const [timeline, setTimeline] = React.useState([])
 	const [usersTyping, setUsersTyping] = React.useState([])
 	const [isTyping, setIsTyping] = React.useState(false)
@@ -48,7 +93,16 @@ function useChannelChat(group_id, channel_id) {
 	function createEventHandler(handler) {
 		return (...args) =>
 			handler(
-				{ setTimeline, setError, setLoading, setUsersTyping },
+				{
+					setTimeline,
+					setError,
+					setLoading,
+					setUsersTyping,
+					oldestId,
+					newestId,
+					events,
+					pausedUpdates,
+				},
 				...args,
 			)
 	}
@@ -68,9 +122,24 @@ function useChannelChat(group_id, channel_id) {
 		}
 	}
 
-	async function send({ message, attachments } = {}) {
-		if (!message || message.length === 0) {
+	async function send({ message, attachments = [] } = {}) {
+		if ((!message || message.length === 0) && attachments.length === 0) {
 			return null
+		}
+
+		if (Array.isArray(attachments)) {
+			attachments = attachments.map((attachment) => {
+				if (typeof attachment === "string") {
+					return {
+						url: attachment,
+					}
+				}
+
+				return {
+					url: attachment.url,
+					hash: attachment.hash,
+				}
+			})
 		}
 
 		const data = {
@@ -93,28 +162,32 @@ function useChannelChat(group_id, channel_id) {
 		return result
 	}
 
-	async function load() {
+	async function load({ beforeId, afterId } = {}) {
 		setLoading(true)
 
+		if (afterId && beforeId) {
+			throw new Error("Only one of beforeId or afterId can be provided")
+		}
+
 		try {
-			const data = await ChatsModel.channels.get(group_id, channel_id, {
+			let data = await ChatsModel.channels.get(group_id, channel_id, {
 				limit: 50,
-				beforeId: oldestId.current,
+				beforeId: beforeId,
+				afterId: afterId,
 			})
 
 			if (data.items.length > 0) {
-				const users = new Map(
-					data.users.map((user) => [user._id, user]),
-				)
+				setHasMore(true)
 
-				data.items = data.items.map((item) => {
-					item.user = users.get(item.user_id)
-					return item
-				})
+				data = setUsersOnMessages(data)
 
-				// append messages to the top of the timeline
-				setTimeline((prev) => [...data.items, ...prev])
-				oldestId.current = data.items[0]._id
+				if (afterId) {
+					setTimeline((prev) => [...data.items, ...prev])
+				} else {
+					setTimeline((prev) => [...prev, ...data.items])
+				}
+			} else {
+				setHasMore(false)
 			}
 		} catch (error) {
 			console.error("Error loading historical messages:", error)
@@ -124,6 +197,70 @@ function useChannelChat(group_id, channel_id) {
 		setLoading(false)
 	}
 
+	const loadBefore = React.useCallback(
+		async (message_id) => {
+			await load({
+				beforeId: message_id ?? oldestId.current,
+			})
+		},
+		[channel_id, group_id],
+	)
+
+	const loadAfter = React.useCallback(
+		async (message_id) => {
+			await load({
+				afterId: message_id ?? newestId.current,
+			})
+		},
+		[channel_id, group_id],
+	)
+
+	const setPausedUpdates = React.useCallback((to) => {
+		pausedUpdates.current = to
+	}, [])
+
+	const initializeRoom = React.useCallback(async () => {
+		if (!wssocket.current) {
+			throw new Error("Chat websocket not available or found")
+		}
+
+		// set states
+		setInitialLoading(true)
+		setLoading(true)
+		setTimeline([])
+		setUsersTyping([])
+		setIsTyping(false)
+		setError(null)
+		oldestId.current = null
+		newestId.current = null
+
+		// register events
+		for (const [event, handler] of Object.entries(ChatEvents)) {
+			wssocket.current.on(event, createEventHandler(handler))
+		}
+
+		// join to subcriber
+		wssocket.current.call("channel:subscribe", {
+			group_id: group_id,
+			channel_id: channel_id,
+		})
+
+		// load messages
+		await load()
+
+		setInitialLoading(false)
+
+		return
+	}, [channel_id, group_id])
+
+	React.useEffect(() => {
+		if (timeline.length > 0) {
+			oldestId.current = timeline[timeline.length - 1]._id
+			newestId.current = timeline[0]._id
+		}
+	}, [timeline])
+
+	// handle typing state
 	React.useEffect(() => {
 		if (!wssocket.current || initialLoading) {
 			return undefined
@@ -140,35 +277,9 @@ function useChannelChat(group_id, channel_id) {
 			})
 	}, [isTyping])
 
-	// initialize room
+	// handle room initialization
 	React.useEffect(() => {
-		if (!wssocket.current) {
-			throw new Error("Chat websocket not available or found")
-		}
-
-		// set states
-		setInitialLoading(true)
-		setLoading(true)
-		setTimeline([])
-		setUsersTyping([])
-		setIsTyping(false)
-		setError(null)
-
-		// load messages
-		load()
-
-		// register events
-		for (const [event, handler] of Object.entries(ChatEvents)) {
-			wssocket.current.on(event, createEventHandler(handler))
-		}
-
-		// join to subcriber
-		wssocket.current.call("channel:subscribe", {
-			group_id: group_id,
-			channel_id: channel_id,
-		})
-
-		setInitialLoading(false)
+		initializeRoom()
 
 		return () => {
 			// unregister events
@@ -189,11 +300,17 @@ function useChannelChat(group_id, channel_id) {
 		timeline: timeline,
 		loading: loading,
 		error: error,
+		loadBefore: loadBefore,
+		loadAfter: loadAfter,
 		load: load,
 		send: send,
 		typing: typing,
 		isTyping: isTyping,
 		usersTyping: usersTyping,
+		pausedUpdates: pausedUpdates.current,
+		setPausedUpdates: setPausedUpdates,
+		hasMore: hasMore,
+		setHasMore: setHasMore,
 	}
 }
 
