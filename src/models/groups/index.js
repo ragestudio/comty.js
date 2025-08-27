@@ -12,6 +12,7 @@ import getGroupChannelMethod from "./methods/getGroupChannel"
 import createChannelMethod from "./methods/createChannel"
 import modifyChannelMethod from "./methods/modifyChannel"
 import deleteChannelMethod from "./methods/deleteChannel"
+import changeChannelsOrderMethod from "./methods/changeChannelsOrderMethod"
 
 import getSoundpadItem from "./methods/getSoundpadItems"
 
@@ -36,8 +37,11 @@ export default class GroupsModel {
 		list: getGroupChannelsMethod,
 		get: getGroupChannelMethod,
 		create: createChannelMethod,
-		modify: modifyChannelMethod,
-		delete: deleteChannelMethod,
+		order: changeChannelsOrderMethod,
+		channel: {
+			modify: modifyChannelMethod,
+			delete: deleteChannelMethod,
+		},
 	}
 
 	static soundpad = {
