@@ -71,15 +71,6 @@ export default class Session {
 	}
 
 	/**
-	 * Retrieves the session UUID from the decoded token object.
-	 *
-	 * @return {string} The session UUID if it exists, otherwise undefined.
-	 */
-	static get session_uuid() {
-		return this.getDecodedToken()?.session_uuid
-	}
-
-	/**
 	 * Retrieves the decoded token from the session storage.
 	 *
 	 * @return {Object|null} The decoded token object if it exists, otherwise null.
@@ -133,16 +124,9 @@ export default class Session {
 	 * @return {Promise<Object>} The response data from the server after deleting the session.
 	 */
 	static async destroyCurrentSession() {
-		const token = await Session.token
-		const session = await Session.getDecodedToken()
-
-		if (!session || !token) {
-			return false
-		}
-
 		const response = await request({
 			method: "delete",
-			url: "/sessions/current",
+			url: "/auth",
 		}).catch((error) => {
 			console.error(error)
 
@@ -151,7 +135,7 @@ export default class Session {
 
 		Session.removeToken()
 
-		__comty_shared_state.eventBus.emit("session.destroyed")
+		__comty_shared_state.eventBus.emit("session:destroyed")
 
 		return response.data
 	}
