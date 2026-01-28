@@ -1,13 +1,7 @@
-import getChannelChat from "./methods/getChannelChat"
-import sendToChannelChat from "./methods/sendToChannelChat"
-import deleteChannelMessage from "./methods/deleteChannelMessage"
+import Channels from "./methods/channels"
+import DM from "./methods/dm"
 
 export default class ChatsService {
-	static channels = {
-		get: getChannelChat,
-		send: sendToChannelChat,
-		messages: {
-			delete: deleteChannelMessage,
-		},
-	}
+	static channels = Channels
+	static dm = DM
 }
