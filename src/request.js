@@ -2,50 +2,49 @@ import handleBeforeRequest from "./helpers/handleBeforeRequest"
 import handleAfterRequest from "./helpers/handleAfterRequest"
 
 export default async (
-    request = {
-        method: "GET",
-    },
-    ...args
+	request = {
+		method: "GET",
+	},
+	...args
 ) => {
-    const instance = request.instance ?? __comty_shared_state.baseRequest
+	const instance = request.instance ?? __comty_shared_state.baseRequest
 
-    if (!instance) {
-        throw new Error("No instance provided")
-    }
+	if (!instance) {
+		throw new Error("No instance provided")
+	}
 
-    // handle before request
-    await handleBeforeRequest(request)
+	// handle before request
+	await handleBeforeRequest(request)
 
-    if (typeof request === "string") {
-        request = {
-            url: request,
-        }
-    }
+	if (typeof request === "string") {
+		request = {
+			url: request,
+		}
+	}
 
-    if (typeof request.headers !== "object") {
-        request.headers = {}
-    }
+	if (typeof request.headers !== "object") {
+		request.headers = {}
+	}
 
-    let result = null
+	let result = null
 
-    const makeRequest = async () => {
-        const _result = await instance(request, ...args)
-            .catch((error) => {
-                return error
-            })
+	const makeRequest = async () => {
+		const _result = await instance(request, ...args).catch((error) => {
+			return error
+		})
 
-        result = _result
-    }
+		result = _result
+	}
 
-    await makeRequest()
+	await makeRequest()
 
-    // handle after request
-    await handleAfterRequest(result, makeRequest)
+	// handle after request
+	await handleAfterRequest(result, makeRequest)
 
-    // if error, throw it
-    if (result instanceof Error) {
-        throw result
-    }
+	// if error, throw it
+	if (result instanceof Error) {
+		throw result
+	}
 
-    return result
+	return result
 }
