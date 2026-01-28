@@ -18,7 +18,7 @@ function setUsersOnMessages(data) {
 }
 
 const ChatEvents = {
-	"channel:message:new": async (ctx, data) => {
+	"channel:message": async (ctx, data) => {
 		console.debug("channel:message:new", data)
 
 		if (!ctx.pausedUpdates.current) {
@@ -74,7 +74,7 @@ const ChatEvents = {
 
 function useChannelChat(group_id, channel_id, events) {
 	const wssocket = React.useRef(
-		globalThis.__comty_shared_state.ws.sockets.get("chats"),
+		globalThis.__comty_shared_state.ws.sockets.get("main"),
 	)
 	const oldestId = React.useRef(null)
 	const newestId = React.useRef(null)
@@ -122,8 +122,12 @@ function useChannelChat(group_id, channel_id, events) {
 		}
 	}
 
-	async function send({ message, attachments = [] } = {}) {
-		if ((!message || message.length === 0) && attachments.length === 0) {
+	async function send({ message, attachments = [], sticker } = {}) {
+		if (
+			(!message || message.length === 0) &&
+			attachments.length === 0 &&
+			!sticker
+		) {
 			return null
 		}
 
@@ -147,19 +151,20 @@ function useChannelChat(group_id, channel_id, events) {
 			channel_id: channel_id,
 			message: message,
 			attachments: attachments,
+			sticker: sticker,
 		}
 
 		const invokeStarts = performance.now()
 
-		const result = await wssocket.current.call("channel:send", data)
+		await wssocket.current.call("channel:send", data)
 
-		console.debug("send result", result, {
+		console.debug("send result", {
 			tooksMs: Number((performance.now() - invokeStarts).toFixed(2)),
 		})
 
 		setIsTyping(false)
 
-		return result
+		return true
 	}
 
 	async function load({ beforeId, afterId } = {}) {
@@ -282,6 +287,10 @@ function useChannelChat(group_id, channel_id, events) {
 		initializeRoom()
 
 		return () => {
+			if (!wssocket.current) {
+				return undefined
+			}
+
 			// unregister events
 			for (const [event, handler] of Object.entries(ChatEvents)) {
 				wssocket.current.off(event, createEventHandler(handler))
