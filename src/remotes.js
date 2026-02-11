@@ -1,7 +1,9 @@
 const envOrigins = {
-	development: globalThis.isServerMode
-		? "http://localhost:9000"
-		: `${globalThis.location?.origin}/api`,
+	// development: globalThis.isServerMode
+	// 	? "http://localhost:9000"
+	// 	: `${globalThis.location?.origin}/api`,
+	//development: "http://127.0.0.1:9000",
+	development: "https://indev-api.comty.app",
 	indev: "https://indev.comty.app/api",
 	production: "https://api.comty.app",
 }
@@ -11,15 +13,7 @@ export default {
 	websockets: [
 		{
 			namespace: "main",
-			path: "/main",
-		},
-		{
-			namespace: "posts",
-			path: "/posts",
-		},
-		{
-			namespace: "chats",
-			path: "/chats",
+			path: "/ws",
 		},
 	],
 }
