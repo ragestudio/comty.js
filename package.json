@@ -14,7 +14,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@foxify/events": "^2.1.0",
-		"axios": "^1.13.4",
+		"axios": "^1.13.5",
 		"js-cookie": "^3.0.5",
 		"jsonwebtoken": "^9.0.3",
 		"jwt-decode": "^4.0.0",
