@@ -4,7 +4,7 @@ const envOrigins = {
 	// 	: `${globalThis.location?.origin}/api`,
 	//development: "http://127.0.0.1:9000",
 	development: "https://indev-api.comty.app",
-	indev: "https://indev.comty.app/api",
+	indev: "https://indev-api.comty.app",
 	production: "https://api.comty.app",
 }
 
