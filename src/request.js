@@ -27,6 +27,9 @@ export default async (
 	}
 
 	let result = null
+	let retryCount = 0
+	const maxRetries = request.maxRetries ?? 3
+	const retryDelay = request.retryDelay ?? 1000
 
 	const makeRequest = async () => {
 		const _result = await instance(request, ...args).catch((error) => {
@@ -36,7 +39,19 @@ export default async (
 		result = _result
 	}
 
-	await makeRequest()
+	const attemptRequest = async () => {
+		await makeRequest()
+
+		// Check if we should retry
+		if (result instanceof Error && retryCount < maxRetries) {
+			retryCount++
+			// Wait for retry delay before next attempt
+			await new Promise((resolve) => setTimeout(resolve, retryDelay))
+			await attemptRequest()
+		}
+	}
+
+	await attemptRequest()
 
 	// handle after request
 	await handleAfterRequest(result, makeRequest)
