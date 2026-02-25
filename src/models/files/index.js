@@ -52,6 +52,8 @@ export default class Files {
 
 			return result
 		} catch (error) {
+			console.error(error)
+
 			if (typeof onError === "function") {
 				onError(file, error)
 			}

@@ -38,9 +38,5 @@ export default async () => {
 	__comty_shared_state.eventBus.emit("session:refreshed")
 	__comty_shared_state.refreshingToken = false
 
-	if (typeof __comty_shared_state.ws === "object") {
-		await __comty_shared_state.ws.connectAll()
-	}
-
 	return true
 }

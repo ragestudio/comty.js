@@ -22,7 +22,11 @@ export default class Session {
 	 * @return {Promise<void>} A promise that resolves when the token is successfully set.
 	 */
 	static set token(token) {
-		return Storage.engine.set(this.storageTokenKey, token)
+		return Storage.engine.set(this.storageTokenKey, token, {
+			path: "/",
+			sameSite: "Strict",
+			expires: 1460,
+		})
 	}
 
 	/**
@@ -41,7 +45,11 @@ export default class Session {
 	 * @return {Promise<void>} A promise that resolves when the refresh token is successfully set.
 	 */
 	static set refreshToken(token) {
-		return Storage.engine.set(this.storageRefreshTokenKey, token)
+		return Storage.engine.set(this.storageRefreshTokenKey, token, {
+			path: "/",
+			sameSite: "Strict",
+			expires: 1460,
+		})
 	}
 
 	/**
@@ -60,15 +68,6 @@ export default class Session {
 	 */
 	static get user_id() {
 		return this.getDecodedToken()?.user_id
-	}
-
-	/**
-	 * Retrieves the session UUID from the decoded token object.
-	 *
-	 * @return {string} The session UUID if it exists, otherwise undefined.
-	 */
-	static get session_uuid() {
-		return this.getDecodedToken()?.session_uuid
 	}
 
 	/**
@@ -125,16 +124,9 @@ export default class Session {
 	 * @return {Promise<Object>} The response data from the server after deleting the session.
 	 */
 	static async destroyCurrentSession() {
-		const token = await Session.token
-		const session = await Session.getDecodedToken()
-
-		if (!session || !token) {
-			return false
-		}
-
 		const response = await request({
 			method: "delete",
-			url: "/sessions/current",
+			url: "/auth",
 		}).catch((error) => {
 			console.error(error)
 
@@ -143,7 +135,7 @@ export default class Session {
 
 		Session.removeToken()
 
-		__comty_shared_state.eventBus.emit("session.destroyed")
+		__comty_shared_state.eventBus.emit("session:destroyed")
 
 		return response.data
 	}

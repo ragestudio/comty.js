@@ -1,78 +1,47 @@
 import Remotes from "./remotes"
 import Storage from "./helpers/withStorage"
 
-import { io } from "socket.io-client"
-import { RTEngineClient } from "linebridge-client"
+import RTEngineClient from "linebridge-client/dist/rtengine"
 
 class WebsocketManager {
 	constructor({ origin }) {
 		this.origin = origin
+
+		for (const remote of Remotes.websockets) {
+			this.sockets.set(remote.namespace, this.createClient(remote))
+		}
 	}
 
 	sockets = new Map()
 
-	async connect(remote) {
-		let opts = {
-			transports: ["websocket"],
-			autoConnect: remote.autoConnect ?? true,
-			forceNew: true,
-			path: remote.path,
-			...(remote.params ?? {}),
-		}
-
-		if (remote.noAuth !== true) {
-			opts.auth = {
-				token: Storage.engine.get("token"),
-			}
-		}
-
-		const socket = io(this.origin, opts)
-
-		socket.on("connect", () => {
-			globalThis.__comty_shared_state.eventBus.emit(
-				`wsmanager:${remote.namespace}:connected`,
-			)
-		})
-
-		socket.on("disconnect", () => {
-			globalThis.__comty_shared_state.eventBus.emit(
-				`wsmanager:${remote.namespace}:disconnected`,
-			)
-		})
-
-		socket.on("error", (error) => {
-			globalThis.__comty_shared_state.eventBus.emit(
-				`wsmanager:${remote.namespace}:error`,
-				error,
-			)
-		})
-
-		this.sockets.set(remote.namespace, socket)
-
-		return socket
-	}
-
-	async connectNg(remote) {
-		console.warn(
-			`Creating experimental socket client, some features may not work as expected:`,
-			remote,
-		)
-
+	createClient(remote) {
 		const client = new RTEngineClient({
 			refName: remote.namespace,
-			url: `${this.origin}/${remote.namespace}`,
-			token: Storage.engine.get("token"),
+			url: `${this.origin}/${remote.path}`,
+			token: () => Storage.engine.get("token"),
 		})
 
-		client.on("connect", () => {
+		client.on("open", () => {
 			globalThis.__comty_shared_state.eventBus.emit(
-				`wsmanager:${remote.namespace}:connected`,
+				`wsmanager:${remote.namespace}:open`,
 			)
 		})
 
-		client.on("disconnect", () => {
+		client.on("close", () => {
 			globalThis.__comty_shared_state.eventBus.emit(
-				`wsmanager:${remote.namespace}:disconnected`,
+				`wsmanager:${remote.namespace}:close`,
+			)
+		})
+
+		client.on("reconnecting", () => {
+			globalThis.__comty_shared_state.eventBus.emit(
+				`wsmanager:${remote.namespace}:reconnecting`,
+			)
+		})
+
+		client.on("reconnected", () => {
+			globalThis.__comty_shared_state.eventBus.emit(
+				`wsmanager:${remote.namespace}:reconnected`,
 			)
 		})
 
@@ -83,56 +52,36 @@ class WebsocketManager {
 			)
 		})
 
-		await client.connect()
-
-		this.sockets.set(remote.namespace, client)
-
 		return client
 	}
 
-	async disconnect(key) {
+	async destroyClient(key) {
 		const socket = this.sockets.get(key)
 
 		if (!socket) {
 			return null
 		}
 
-		const isConnected =
-			socket.connected === true || socket.state?.connected === true
-
-		if (isConnected && typeof socket.disconnect === "function") {
-			await socket.disconnect()
-		}
-
-		if (typeof socket.removeAllListeners === "function") {
-			await socket.removeAllListeners()
-		}
+		await socket.destroy()
+		await socket.removeAllListeners()
 
 		this.sockets.delete(key)
 	}
 
-	async connectAll() {
-		if (this.sockets.size > 0) {
-			await this.disconnectAll()
+	async reauthenticate() {
+		for (const [key, socket] of this.sockets) {
+			await socket.authenticate(() => Storage.engine.get("token"))
 		}
+	}
 
-		for await (const remote of Remotes.websockets) {
-			try {
-				if (remote.ng === true) {
-					await this.connectNg(remote)
-				} else {
-					await this.connect(remote)
-				}
-			} catch (error) {
-				console.error(
-					`Failed to connect to [${remote.namespace}]:`,
-					error,
-				)
-				globalThis.__comty_shared_state.eventBus.emit(
-					`wsmanager:${remote.namespace}:error`,
-					error,
-				)
+	async connectAll() {
+		for (let [namespace, client] of this.sockets) {
+			if (client.connected) {
+				await this.destroyClient(namespace)
+				this.sockets.set(namespace, this.createClient(client))
 			}
+
+			await client.connect()
 		}
 
 		globalThis.__comty_shared_state.eventBus.emit("wsmanager:all:connected")
@@ -140,7 +89,7 @@ class WebsocketManager {
 
 	async disconnectAll() {
 		for (const [key, socket] of this.sockets) {
-			await this.disconnect(key)
+			await this.destroyClient(key)
 		}
 	}
 }

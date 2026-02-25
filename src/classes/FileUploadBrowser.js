@@ -61,6 +61,19 @@ export default class FileUploadBrowser {
 			"offline",
 			() => ((this.offline = true), this.events.emit("offline")),
 		)
+
+		this.websocket =
+			globalThis.__comty_shared_state?.ws?.sockets?.get("main") ?? null
+
+		this.websocketJobEvent = `job:${this.headers["uploader-file-id"]}`
+
+		if (!this.websocket) {
+			new Error(
+				"Cannot listen to job events over websocket. Socket/Context no available",
+			)
+		}
+
+		this.websocket.on(this.websocketJobEvent, this.handleJobWebsocketEvent)
 	}
 
 	_reader = new FileReader()
@@ -151,28 +164,25 @@ export default class FileUploadBrowser {
 			}
 
 			const data = await res.json()
-
-			console.log(`[UPLOADER] Chunk ${this.chunkCount} sent`)
-
 			this.chunkCount = this.chunkCount + 1
-
-			if (this.chunkCount < this.totalChunks) {
-				this.nextSend()
-			}
-
-			// check if is the last chunk, if so, handle sse events
-			if (this.chunkCount === this.totalChunks) {
-				if (data.sseChannelId || data.sseUrl) {
-					this.waitOnSSE(data)
-				} else {
-					this.events.emit("finish", data)
-				}
-			}
 
 			this.events.emit("progress", {
 				percent: Math.round((100 / this.totalChunks) * this.chunkCount),
 				state: "Uploading",
 			})
+
+			console.debug(`[UPLOADER] Chunk ${this.chunkCount} sent`)
+
+			if (this.chunkCount < this.totalChunks) {
+				this.nextSend()
+			}
+
+			// check if is the last chunk
+			if (this.chunkCount === this.totalChunks) {
+				if (!data.useWebsocketEvents) {
+					this.events.emit("finish", data)
+				}
+			}
 		} catch (error) {
 			this.events.emit("error", error)
 		}
@@ -186,44 +196,28 @@ export default class FileUploadBrowser {
 		}
 	}
 
-	waitOnSSE(data) {
-		// temporal solution until a better solution
-		const url = `${app.cores.api.client().mainOrigin}/upload/sse_events/${data.sseChannelId}`
-
-		console.log(`[UPLOADER] Connecting to SSE channel >`, url)
-		const eventSource = new EventSource(url)
-
-		eventSource.onerror = (error) => {
-			this.events.emit("error", error)
-			eventSource.close()
+	handleJobWebsocketEvent = (data) => {
+		if (data.event === "done") {
+			this.events.emit("finish", data.result)
+			this.websocket.off(
+				this.websocketJobEvent,
+				this.handleJobWebsocketEvent,
+			)
 		}
 
-		eventSource.onopen = () => {
-			console.log(`[UPLOADER] SSE channel opened`)
+		if (data.event === "error") {
+			this.events.emit("error", data.result)
+			this.websocket.off(
+				this.websocketJobEvent,
+				this.handleJobWebsocketEvent,
+			)
 		}
 
-		eventSource.onmessage = (event) => {
-			// parse json
-			const messageData = JSON.parse(event.data)
-
-			console.log(`[UPLOADER] SSE Event >`, messageData)
-
-			if (messageData.event === "done") {
-				this.events.emit("finish", messageData.result)
-				eventSource.close()
-			}
-
-			if (messageData.event === "error") {
-				this.events.emit("error", messageData.result)
-				eventSource.close()
-			}
-
-			if (messageData.state) {
-				this.events.emit("progress", {
-					percent: messageData.percent,
-					state: messageData.state,
-				})
-			}
+		if (data.state) {
+			this.events.emit("progress", {
+				percent: data.percent,
+				state: data.state,
+			})
 		}
 	}
 }

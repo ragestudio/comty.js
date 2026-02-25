@@ -1,5 +1,20 @@
-import SessionModel from "../session"
-import request from "../../request"
+import dataMethod from "./methods/data"
+import unsetPublicNameMethod from "./methods/unsetPublicName"
+import updateDataMethod from "./methods/updateData"
+
+import getBadgesMethod from "./methods/getBadges"
+import getRolesMethod from "./methods/getRoles"
+
+import getConfigMethod from "./methods/getConfig"
+import updateConfigMethod from "./methods/updateConfig"
+
+import getAvatarMethod from "./methods/getAvatar"
+import isUserConnectedMethod from "./methods/isUserConnected"
+
+import getPublicKeyMethod from "./methods/getPublicKey"
+import updatePublicKeyMethod from "./methods/updatePublicKey"
+
+import V2 from "./UserV2"
 
 export default class User {
 	/**
@@ -10,41 +25,7 @@ export default class User {
 	 * @param {string} payload.user_id - The ID of the user.
 	 * @return {Promise<Object>} - A promise that resolves with the data of the user.
 	 */
-	static async data(payload = {}) {
-		let { username, user_id, basic = false } = payload
-
-		if (!username && !user_id) {
-			const response = await request({
-				method: "GET",
-				url: `/users/self`,
-				params: {
-					basic,
-				},
-			})
-
-			return response.data
-		}
-
-		if (username && !user_id) {
-			// resolve user_id from username
-			const resolveResponse = await request({
-				method: "GET",
-				url: `/users/${username}/resolve-user_id`,
-			})
-
-			user_id = resolveResponse.data.user_id
-		}
-
-		const response = await request({
-			method: "GET",
-			url: `/users/${user_id}/data`,
-			params: {
-				basic,
-			},
-		})
-
-		return response.data
-	}
+	static data = dataMethod
 
 	/**
 	 * Updates the user data with the given payload.
@@ -52,26 +33,14 @@ export default class User {
 	 * @param {Object} payload - The data to update the user with.
 	 * @return {Promise<Object>} - A promise that resolves with the updated user data.
 	 */
-	static async updateData(payload) {
-		const response = await request({
-			method: "POST",
-			url: "/users/self/update",
-			data: payload,
-		})
-
-		return response.data
-	}
+	static updateData = updateDataMethod
 
 	/**
 	 * Update the public name to null in the user data.
 	 *
 	 * @return {Promise} A Promise that resolves with the response data after updating the public name
 	 */
-	static async unsetPublicName() {
-		return await User.updateData({
-			public_name: null,
-		})
-	}
+	static unsetPublicName = unsetPublicNameMethod
 
 	/**
 	 * Retrieves the roles of a user.
@@ -79,14 +48,7 @@ export default class User {
 	 * @param {string} user_id - The ID of the user. If not provided, the current user ID will be used.
 	 * @return {Promise<Array>} An array of roles for the user.
 	 */
-	static async getRoles(user_id) {
-		const response = await request({
-			method: "GET",
-			url: `/users/${user_id ?? "self"}/roles`,
-		})
-
-		return response.data
-	}
+	static getRoles = getRolesMethod
 
 	/**
 	 * Retrieves the badges for a given user.
@@ -94,18 +56,7 @@ export default class User {
 	 * @param {string} user_id - The ID of the user. If not provided, the current session user ID will be used.
 	 * @return {Promise<Array>} An array of badges for the user.
 	 */
-	static async getBadges(user_id) {
-		if (!user_id) {
-			user_id = SessionModel.user_id
-		}
-
-		const { data } = await request({
-			method: "GET",
-			url: `/users/${user_id}/badges`,
-		})
-
-		return data
-	}
+	static getBadges = getBadgesMethod
 
 	/**
 	 * Retrive user config from server
@@ -113,17 +64,7 @@ export default class User {
 	 * @param {type} key - A key of config
 	 * @return {object} - Config object
 	 */
-	static async getConfig(key) {
-		const { data } = await request({
-			method: "GET",
-			url: "/users/self/config",
-			params: {
-				key,
-			},
-		})
-
-		return data
-	}
+	static getConfig = getConfigMethod
 
 	/**
 	 * Update the configuration with the given update.
@@ -131,38 +72,14 @@ export default class User {
 	 * @param {Object} update - The object containing the updated configuration data
 	 * @return {Promise} A Promise that resolves with the response data after the configuration is updated
 	 */
-	static async updateConfig(update) {
-		const { data } = await request({
-			method: "PUT",
-			url: "/users/self/config",
-			data: update,
-		})
+	static updateConfig = updateConfigMethod
 
-		return data
-	}
+	static getPublicKey = getPublicKeyMethod
+	static updatePublicKey = updatePublicKeyMethod
 
-	static async getPublicKey(user_id) {
-		if (!user_id) {
-			user_id = SessionModel.user_id
-		}
+	static getAvatar = getAvatarMethod
 
-		const { data } = await request({
-			method: "GET",
-			url: `/users/${user_id}/public-key`,
-		})
+	static isUserConnected = isUserConnectedMethod
 
-		return data
-	}
-
-	static async updatePublicKey(public_key) {
-		const { data } = await request({
-			method: "PUT",
-			url: `/users/self/public-key`,
-			data: {
-				public_key: public_key,
-			},
-		})
-
-		return data
-	}
+	static V2 = V2
 }

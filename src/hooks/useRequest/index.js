@@ -38,5 +38,6 @@ export default (method, ...args) => {
 			setLoading(true)
 			makeRequest(...args)
 		},
+		setResult,
 	]
 }

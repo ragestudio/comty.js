@@ -52,7 +52,7 @@ export default class Streaming {
 		const { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "get",
-			url: `/stream/${stream_id}/data`,
+			url: `/stream/${stream_id}`,
 		})
 
 		return data
@@ -62,7 +62,7 @@ export default class Streaming {
 		const { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "GET",
-			url: "/streaming/profiles/self",
+			url: "/profiles/self",
 		})
 
 		return data
@@ -76,7 +76,7 @@ export default class Streaming {
 		const { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "GET",
-			url: `/streaming/profiles/${profile_id}`,
+			url: `/stream/${profile_id}`,
 		})
 
 		return data
@@ -86,7 +86,7 @@ export default class Streaming {
 		const { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "POST",
-			url: "/streaming/profiles/new",
+			url: "/profiles/new",
 			data: payload,
 		})
 
@@ -101,7 +101,7 @@ export default class Streaming {
 		const { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "PUT",
-			url: `/streaming/profiles/${profile_id}`,
+			url: `/profiles/${profile_id}`,
 			data: update,
 		})
 
@@ -116,7 +116,7 @@ export default class Streaming {
 		const { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "delete",
-			url: `/streaming/profiles/${profile_id}`,
+			url: `/profiles/${profile_id}`,
 		})
 
 		return data
@@ -131,7 +131,7 @@ export default class Streaming {
 		const { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "put",
-			url: `/streaming/profiles/${profileId}/restreams`,
+			url: `/profiles/${profileId}/restreams`,
 			data: restreamData,
 		})
 
@@ -147,7 +147,7 @@ export default class Streaming {
 		const { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "delete",
-			url: `/streaming/profiles/${profileId}/restreams`,
+			url: `/profiles/${profileId}/restreams`,
 			data: restreamIndexData,
 		})
 
@@ -158,7 +158,7 @@ export default class Streaming {
 		let { data } = await request({
 			baseURL: Streaming.baseUrl,
 			method: "get",
-			url: "/streaming/list",
+			url: "/streams/list",
 			params: {
 				limit,
 				offset,
