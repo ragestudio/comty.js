@@ -164,10 +164,14 @@ export default class FileUploadBrowser {
 			}
 
 			const data = await res.json()
-
-			console.log(`[UPLOADER] Chunk ${this.chunkCount} sent`)
-
 			this.chunkCount = this.chunkCount + 1
+
+			this.events.emit("progress", {
+				percent: Math.round((100 / this.totalChunks) * this.chunkCount),
+				state: "Uploading",
+			})
+
+			console.debug(`[UPLOADER] Chunk ${this.chunkCount} sent`)
 
 			if (this.chunkCount < this.totalChunks) {
 				this.nextSend()
@@ -179,11 +183,6 @@ export default class FileUploadBrowser {
 					this.events.emit("finish", data)
 				}
 			}
-
-			this.events.emit("progress", {
-				percent: Math.round((100 / this.totalChunks) * this.chunkCount),
-				state: "Uploading",
-			})
 		} catch (error) {
 			this.events.emit("error", error)
 		}
