@@ -43,7 +43,11 @@ export default async (
 		await makeRequest()
 
 		// Check if we should retry
-		if (result instanceof Error && retryCount < maxRetries) {
+		if (
+			result instanceof Error &&
+			retryCount < maxRetries &&
+			result.response?.status === 500
+		) {
 			retryCount++
 			// Wait for retry delay before next attempt
 			await new Promise((resolve) => setTimeout(resolve, retryDelay))
