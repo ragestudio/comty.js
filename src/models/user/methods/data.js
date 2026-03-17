@@ -25,6 +25,10 @@ export default async (payload = {}) => {
 		user_id = resolveResponse.data.user_id
 	}
 
+	if (!user_id && !username) {
+		return {}
+	}
+
 	const response = await request({
 		method: "GET",
 		url: `/users/${user_id}/data`,
