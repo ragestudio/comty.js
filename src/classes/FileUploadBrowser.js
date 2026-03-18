@@ -9,13 +9,14 @@ export default class FileUploadBrowser {
 			splitChunkSize = 1024 * 1024 * 10,
 			maxRetries = 3,
 			delayBeforeRetry = 5,
+			concurrency = 3,
 		} = params
 
 		if (!endpoint) {
 			throw new Error("Missing endpoint")
 		}
 
-		if ((!file) instanceof File) {
+		if (!(file instanceof File)) {
 			throw new Error("Invalid or missing file")
 		}
 
@@ -27,15 +28,25 @@ export default class FileUploadBrowser {
 			throw new Error("Invalid splitChunkSize")
 		}
 
-		this.chunkCount = 0
-		this.retriesCount = 0
-
 		this.splitChunkSize = splitChunkSize
 		this.totalChunks = Math.ceil(file.size / splitChunkSize)
 
 		this.maxRetries = maxRetries
 		this.delayBeforeRetry = delayBeforeRetry
-		this.offline = this.paused = false
+		this.concurrency = concurrency
+
+		this.completedChunks = 0
+		this.activeUploads = 0
+		this.hasFatalError = false
+		this.chunkRetries = new Map()
+
+		this.pendingChunks = Array.from(
+			{ length: this.totalChunks },
+			(_, i) => i,
+		)
+
+		this.offline = false
+		this.paused = false
 
 		this.endpoint = endpoint
 		this.file = file
@@ -49,38 +60,39 @@ export default class FileUploadBrowser {
 			connection: "keep-alive",
 		}
 
-		window.addEventListener(
-			"online",
-			() =>
-				!this.offline &&
-				((this.offline = false),
-				this.events.emit("online"),
-				this.nextSend()),
-		)
-		window.addEventListener(
-			"offline",
-			() => ((this.offline = true), this.events.emit("offline")),
-		)
+		window.addEventListener("online", () => {
+			if (this.offline) {
+				this.offline = false
+				this.events.emit("online")
+				this.processNext()
+			}
+		})
+
+		window.addEventListener("offline", () => {
+			this.offline = true
+			this.events.emit("offline")
+		})
 
 		this.websocket =
 			globalThis.__comty_shared_state?.ws?.sockets?.get("main") ?? null
-
 		this.websocketJobEvent = `job:${this.headers["uploader-file-id"]}`
 
 		if (!this.websocket) {
-			new Error(
+			console.warn(
 				"Cannot listen to job events over websocket. Socket/Context no available",
 			)
+		} else {
+			this.websocket.on(
+				this.websocketJobEvent,
+				this.handleJobWebsocketEvent,
+			)
 		}
-
-		this.websocket.on(this.websocketJobEvent, this.handleJobWebsocketEvent)
 	}
 
-	_reader = new FileReader()
 	events = new EventEmitter()
 
 	start = () => {
-		this.nextSend()
+		this.processNext()
 	}
 
 	getFileUID(file) {
@@ -92,99 +104,104 @@ export default class FileUploadBrowser {
 		)
 	}
 
-	loadChunk() {
-		return new Promise((resolve) => {
-			const start = this.chunkCount * this.splitChunkSize
-			const end = Math.min(start + this.splitChunkSize, this.file.size)
-
-			// load chunk as buffer
-			this._reader.onload = () => {
-				resolve(
-					new Blob([this._reader.result], {
-						type: "application/octet-stream",
-					}),
-				)
-			}
-			this._reader.readAsArrayBuffer(this.file.slice(start, end))
-		})
+	getChunkBlob(chunkIndex) {
+		const start = chunkIndex * this.splitChunkSize
+		const end = Math.min(start + this.splitChunkSize, this.file.size)
+		return this.file.slice(start, end, "application/octet-stream")
 	}
 
-	async sendChunk() {
-		console.log(`[UPLOADER] Sending chunk ${this.chunkCount}`, {
-			currentChunk: this.chunkCount,
-			totalChunks: this.totalChunks,
-			chunk: this.chunk,
-		})
+	processNext = () => {
+		if (this.paused || this.offline || this.hasFatalError) {
+			return
+		}
+
+		while (
+			this.activeUploads < this.concurrency &&
+			this.pendingChunks.length > 0
+		) {
+			const chunkIndex = this.pendingChunks.shift()
+			this.activeUploads++
+			this.uploadChunk(chunkIndex)
+		}
+	}
+
+	async uploadChunk(chunkIndex) {
+		console.log(`[UPLOADER] Starting chunk ${chunkIndex}`)
+		const chunkBlob = this.getChunkBlob(chunkIndex)
 
 		try {
 			const res = await fetch(this.endpoint, {
 				method: "POST",
 				headers: {
 					...this.headers,
-					"uploader-chunk-number": this.chunkCount,
+					"uploader-chunk-number": chunkIndex,
 				},
-				body: this.chunk,
+				body: chunkBlob,
 			})
-
-			return res
-		} catch (error) {
-			this.manageRetries()
-		}
-	}
-
-	manageRetries() {
-		if (++this.retriesCount < this.maxRetries) {
-			setTimeout(() => this.nextSend(), this.delayBeforeRetry * 1000)
-
-			this.events.emit("fileRetry", {
-				message: `Retrying chunk ${this.chunkCount}`,
-				chunk: this.chunkCount,
-				retriesLeft: this.retries - this.retriesCount,
-			})
-		} else {
-			this.events.emit("error", {
-				message: `No more retries for chunk ${this.chunkCount}`,
-			})
-		}
-	}
-
-	async nextSend() {
-		if (this.paused || this.offline) {
-			return null
-		}
-
-		this.chunk = await this.loadChunk()
-
-		try {
-			const res = await this.sendChunk()
 
 			if (![200, 201, 204].includes(res.status)) {
-				// failed!!
-				return this.manageRetries()
+				throw new Error(`HTTP Error ${res.status}`)
 			}
 
-			const data = await res.json()
-			this.chunkCount = this.chunkCount + 1
+			const data = await res.json().catch(() => ({}))
+
+			this.completedChunks++
+			this.activeUploads--
 
 			this.events.emit("progress", {
-				percent: Math.round((100 / this.totalChunks) * this.chunkCount),
+				percent: Math.round(
+					(100 / this.totalChunks) * this.completedChunks,
+				),
 				state: "Uploading",
 			})
 
-			console.debug(`[UPLOADER] Chunk ${this.chunkCount} sent`)
+			console.debug(
+				`[UPLOADER] Chunk ${chunkIndex} sent. (${this.completedChunks}/${this.totalChunks})`,
+			)
 
-			if (this.chunkCount < this.totalChunks) {
-				this.nextSend()
-			}
+			this.processNext()
 
-			// check if is the last chunk
-			if (this.chunkCount === this.totalChunks) {
+			if (this.completedChunks === this.totalChunks) {
 				if (!data.useWebsocketEvents) {
 					this.events.emit("finish", data)
 				}
 			}
 		} catch (error) {
-			this.events.emit("error", error)
+			this.activeUploads--
+			this.handleRetry(chunkIndex, error)
+		}
+	}
+
+	handleRetry(chunkIndex, error) {
+		if (this.hasFatalError) {
+			return
+		}
+
+		const retries = this.chunkRetries.get(chunkIndex) || 0
+
+		if (retries < this.maxRetries) {
+			this.chunkRetries.set(chunkIndex, retries + 1)
+
+			this.events.emit("fileRetry", {
+				message: `Retrying chunk ${chunkIndex}`,
+				chunk: chunkIndex,
+				retriesLeft: this.maxRetries - (retries + 1),
+			})
+
+			setTimeout(() => {
+				if (!this.hasFatalError) {
+					this.pendingChunks.unshift(chunkIndex)
+					this.processNext()
+				}
+			}, this.delayBeforeRetry * 1000)
+
+			this.processNext()
+		} else {
+			this.hasFatalError = true
+			this.events.emit("error", {
+				message: `No more retries for chunk ${chunkIndex}`,
+				error,
+			})
 		}
 	}
 
@@ -192,7 +209,7 @@ export default class FileUploadBrowser {
 		this.paused = !this.paused
 
 		if (!this.paused) {
-			return this.nextSend()
+			this.processNext()
 		}
 	}
 
