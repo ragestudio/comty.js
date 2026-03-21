@@ -288,8 +288,8 @@ function useChat(type, params, events) {
 		socket.on(config.events.messageDeleted, handleMessageDeleted)
 		socket.on(config.events.typing, handleTypingEvent)
 
-		socket
-			.call(config.methods.subscribe, subscribeParams)
+		socket.topics
+			.subscribe(config.methods.subscribe, subscribeParams)
 			.catch(console.error)
 
 		config.model
@@ -329,8 +329,8 @@ function useChat(type, params, events) {
 			socket.off(config.events.messageDeleted, handleMessageDeleted)
 			socket.off(config.events.typing, handleTypingEvent)
 
-			socket
-				.call(config.methods.unsubscribe, subscribeParams)
+			socket.topics
+				.unsubscribe(config.methods.unsubscribe, subscribeParams)
 				.catch(console.error)
 		}
 	}, [
