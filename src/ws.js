@@ -2,6 +2,7 @@ import Remotes from "./remotes"
 import Storage from "./helpers/withStorage"
 
 import RTEngineClient from "linebridge-client/dist/rtengine"
+//import { RTEngineClient } from "../../linebridge/client/src/rtengine"
 
 class WebsocketManager {
 	constructor({ origin }) {
