@@ -44,6 +44,7 @@ export function createClient({
 		ws: null,
 		version: pkg.version,
 		addons: new AddonsManager(),
+		decTokenStore: new Map(),
 	})
 
 	if (privateKey && accessKey && globalThis.isServerMode) {

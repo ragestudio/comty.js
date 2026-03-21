@@ -39,6 +39,35 @@ export default class Session {
 	}
 
 	/**
+	 * Checks if the token is expired.
+	 *
+	 * @return {boolean|null} `true` if the token is expired, `false` if it is not, or `null` if no token is present.
+	 */
+	static get isTokenExpired() {
+		if (!globalThis.__comty_shared_state) {
+			return null
+		}
+
+		let token = this.token
+
+		if (!token) {
+			return null
+		}
+
+		if (!globalThis.__comty_shared_state.decTokenStore.has(token)) {
+			globalThis.__comty_shared_state.decTokenStore.clear()
+			globalThis.__comty_shared_state.decTokenStore.set(
+				token,
+				jwtDecode(token),
+			)
+		}
+
+		token = globalThis.__comty_shared_state.decTokenStore.get(token)
+
+		return token.exp < Date.now() / 1000
+	}
+
+	/**
 	 * Sets the refresh token in the storage engine.
 	 *
 	 * @param {string} token - The refresh token to be set.
@@ -50,6 +79,12 @@ export default class Session {
 			sameSite: "Strict",
 			expires: 1460,
 		})
+	}
+
+	static get tokenExpiration() {
+		const token = this.token
+
+		return token && jwtDecode(token).exp
 	}
 
 	/**

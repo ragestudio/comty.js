@@ -19,6 +19,7 @@ class WebsocketManager {
 			refName: remote.namespace,
 			url: `${this.origin}/${remote.path}`,
 			token: () => Storage.engine.get("token"),
+			worker: true,
 		})
 
 		client.on("open", () => {
