@@ -21,6 +21,9 @@
 		"linebridge-client": "^1.6.0",
 		"luxon": "^3.7.2"
 	},
+	"peerDependencies": {
+		"react": "^18.2.0"
+	},
 	"devDependencies": {
 		"@ragestudio/hermes": "^1.0.1"
 	}
