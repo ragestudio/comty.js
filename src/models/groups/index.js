@@ -2,6 +2,7 @@ import Members from "./members"
 import Channels from "./channels"
 
 import getMyGroupsMethod from "./methods/getMyGroups"
+import sortMyGroupsMethod from "./methods/sortGroups"
 
 import getGroupMethod from "./methods/getGroup"
 import createGroupMethod from "./methods/createGroup"
@@ -25,6 +26,7 @@ export default class GroupsModel {
 	static get = getGroupMethod
 	static modify = modifyGroupMethod
 	static delete = deleteGroupMethod
+	static sort = sortMyGroupsMethod
 
 	static members = Members
 	static channels = Channels
