@@ -1,4 +1,5 @@
 import EventEmitter from "@foxify/events"
+import xxhash from "xxhash-wasm"
 
 export default class FileUploadBrowser {
 	constructor(params) {
@@ -52,8 +53,9 @@ export default class FileUploadBrowser {
 		this.file = file
 		this.headers = {
 			...headers,
-			"uploader-original-name": encodeURIComponent(file.name),
 			"uploader-file-id": this.getFileUID(file),
+			"uploader-file-hash": null,
+			"uploader-original-name": encodeURIComponent(file.name),
 			"uploader-chunks-total": this.totalChunks,
 			"chunk-size": splitChunkSize,
 			"cache-control": "no-cache",
@@ -91,7 +93,13 @@ export default class FileUploadBrowser {
 
 	events = new EventEmitter()
 
-	start = () => {
+	start = async () => {
+		const fileHash = await this.getFileHash(this.file)
+
+		if (fileHash) {
+			this.headers["uploader-file-hash"] = fileHash
+		}
+
 		this.processNext()
 	}
 
@@ -102,6 +110,33 @@ export default class FileUploadBrowser {
 			file.size +
 			"_tmp"
 		)
+	}
+
+	async getFileHash(file) {
+		if (!(file instanceof File)) {
+			throw new Error("file must be a instance of File")
+		}
+
+		if (globalThis.xxhash) {
+			const hasher = window.xxhash.create64(0n)
+
+			const stream = file.stream()
+			const reader = stream.getReader()
+
+			while (true) {
+				const { done, value } = await reader.read()
+
+				if (done) {
+					break
+				}
+
+				hasher.update(value)
+			}
+
+			return hasher.digest().toString(16).padStart(16, "0")
+		}
+
+		return null
 	}
 
 	getChunkBlob(chunkIndex) {
@@ -119,6 +154,13 @@ export default class FileUploadBrowser {
 			this.activeUploads < this.concurrency &&
 			this.pendingChunks.length > 0
 		) {
+			if (
+				this.pendingChunks[0] === this.totalChunks - 1 &&
+				this.activeUploads > 0
+			) {
+				break
+			}
+
 			const chunkIndex = this.pendingChunks.shift()
 			this.activeUploads++
 			this.uploadChunk(chunkIndex)
@@ -195,7 +237,7 @@ export default class FileUploadBrowser {
 				}
 			}, this.delayBeforeRetry * 1000)
 
-			this.processNext()
+			//this.processNext()
 		} else {
 			this.hasFatalError = true
 			this.events.emit("error", {
