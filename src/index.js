@@ -1,6 +1,7 @@
 import pkg from "../package.json"
 import EventEmitter from "@foxify/events"
 import axios from "axios"
+import xxhash from "xxhash-wasm"
 
 import AddonsManager from "./addons"
 import WebsocketManager from "./ws"
@@ -27,7 +28,7 @@ if (globalThis.isServerMode) {
  * @param {Object} options - Optional parameters for accessKey, privateKey, and enableWs
  * @return {Object} sharedState - Object containing eventBus, mainOrigin, baseRequest, sockets, rest, and version
  */
-export function createClient({
+export async function createClient({
 	accessKey = null,
 	privateKey = null,
 	ws = {
@@ -46,6 +47,8 @@ export function createClient({
 		addons: new AddonsManager(),
 		decTokenStore: new Map(),
 	})
+
+	globalThis.xxhash = await xxhash()
 
 	if (privateKey && accessKey && globalThis.isServerMode) {
 		Storage.engine.set("token", `${accessKey}:${privateKey}`)
