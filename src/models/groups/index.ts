@@ -3,6 +3,7 @@ import Channels from "./channels"
 
 import getMyGroupsMethod from "./methods/getMyGroups"
 import sortMyGroupsMethod from "./methods/sortGroups"
+import leaveGroupMethod from "./methods/leaveGroup"
 
 import getGroupMethod from "./methods/getGroup"
 import createGroupMethod from "./methods/createGroup"
@@ -16,7 +17,6 @@ import joinWithInviteKeyMethod from "./methods/joinWithInviteKey"
 import deleteInviteMethod from "./methods/deleteInvite"
 
 import getSoundpadItem from "./methods/getSoundpadItems"
-
 import getGroupRTCState from "./methods/getGroupRTCState"
 
 export default class GroupsModel {
@@ -27,6 +27,7 @@ export default class GroupsModel {
 	static modify = modifyGroupMethod
 	static delete = deleteGroupMethod
 	static sort = sortMyGroupsMethod
+	static leave = leaveGroupMethod
 
 	static members = Members
 	static channels = Channels
