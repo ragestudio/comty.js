@@ -6,7 +6,14 @@ export default (method, ...args) => {
 	const [error, setError] = React.useState(null)
 
 	if (typeof method !== "function") {
-		return [() => {}, null, new Error("Method is not a function"), () => {}]
+		return {
+			loading: false,
+			error: new Error("Method is not a function"),
+			result: null,
+			setResult: () => {},
+			req: () => {},
+			repeat: () => {},
+		}
 	}
 
 	const req = async (..._) => {
