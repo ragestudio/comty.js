@@ -5,13 +5,16 @@
 	"description": "Official Comty API for JavaScript",
 	"homepage": "https://github.com/ragestudio/comty.js",
 	"author": "RageStudio <support@ragestudio.net>",
+	"license": "MIT",
 	"scripts": {
 		"build": "hermes build"
 	},
 	"files": [
 		"dist"
 	],
-	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	},
 	"dependencies": {
 		"@foxify/events": "^2.1.0",
 		"axios": "^1.16.1",
