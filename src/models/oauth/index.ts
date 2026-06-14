@@ -5,6 +5,15 @@ export type CreateAppPayload = {
 	redirect_uris: string[]
 }
 
+export type AuthorizePayload = {
+	action: string
+	client_id: string
+	scope: string
+	redirect_uri: string
+	response_type: string
+	state?: string
+}
+
 export default class OAuth {
 	static async getMyApps() {
 		const response = await request({
@@ -54,6 +63,18 @@ export default class OAuth {
 		const response = await request({
 			method: "POST",
 			url: `/oauth/apps/${clientId}/regenerate-secret`,
+		})
+
+		return response.data
+	}
+
+	static async authorize(payload: AuthorizePayload) {
+		const query = new URLSearchParams(payload).toString()
+
+		const response = await request({
+			method: "POST",
+			url: `/oauth/authorize?${query}`,
+			data: payload,
 		})
 
 		return response.data
