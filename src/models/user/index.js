@@ -14,6 +14,10 @@ import isUserConnectedMethod from "./methods/isUserConnected"
 import getPublicKeyMethod from "./methods/getPublicKey"
 import updatePublicKeyMethod from "./methods/updatePublicKey"
 
+import generateTotpMethod from "./methods/generateTotp"
+import enableTotpMethod from "./methods/enableTotp"
+import disableTotpMethod from "./methods/disableTotp"
+
 import V2 from "./UserV2"
 
 export default class User {
@@ -76,6 +80,10 @@ export default class User {
 
 	static getPublicKey = getPublicKeyMethod
 	static updatePublicKey = updatePublicKeyMethod
+
+	static generateTotp = generateTotpMethod
+	static enableTotp = enableTotpMethod
+	static disableTotp = disableTotpMethod
 
 	static getAvatar = getAvatarMethod
 
