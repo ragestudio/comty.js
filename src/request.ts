@@ -1,12 +1,25 @@
 import handleBeforeRequest from "./helpers/handleBeforeRequest"
 import handleAfterRequest from "./helpers/handleAfterRequest"
+import type {
+	AxiosError,
+	AxiosInstance,
+	AxiosRequestConfig,
+	AxiosResponse,
+} from "axios"
+
+type CustomRequest = AxiosRequestConfig & {
+	instance?: AxiosInstance
+	maxRetries?: number
+	retryDelay?: number
+}
 
 export default async (
 	request = {
 		method: "GET",
-	},
-	...args
+	} as CustomRequest,
+	...args: any[]
 ) => {
+	//@ts-ignore
 	const instance = request.instance ?? __comty_shared_state.baseRequest
 
 	if (!instance) {
@@ -14,7 +27,7 @@ export default async (
 	}
 
 	// handle before request
-	await handleBeforeRequest(request)
+	await handleBeforeRequest()
 
 	if (typeof request === "string") {
 		request = {
@@ -26,17 +39,15 @@ export default async (
 		request.headers = {}
 	}
 
-	let result = null
+	let result!: AxiosResponse | AxiosError
 	let retryCount = 0
 	const maxRetries = request.maxRetries ?? 3
 	const retryDelay = request.retryDelay ?? 1000
 
 	const makeRequest = async () => {
-		const _result = await instance(request, ...args).catch((error) => {
+		result = await instance(request, ...args).catch((error: any) => {
 			return error
 		})
-
-		result = _result
 	}
 
 	const attemptRequest = async () => {

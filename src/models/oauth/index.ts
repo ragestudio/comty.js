@@ -1,8 +1,12 @@
 import request from "../../request"
 
-export type CreateAppPayload = {
+export type OAuthAppPayload = {
 	client_name: string
 	redirect_uris: string[]
+	logo_url?: string
+	website_url?: string
+	scopes?: string[]
+	grant_types?: string[]
 }
 
 export type AuthorizePayload = {
@@ -24,7 +28,7 @@ export default class OAuth {
 		return response.data
 	}
 
-	static async createApp(payload: CreateAppPayload) {
+	static async createApp(payload: OAuthAppPayload) {
 		if (typeof payload.client_name !== "string") {
 			throw new Error("name must be a string")
 		}
@@ -36,6 +40,20 @@ export default class OAuth {
 		const response = await request({
 			method: "POST",
 			url: "/oauth/apps",
+			data: payload,
+		})
+
+		return response.data
+	}
+
+	static async updateApp(clientId: string, payload: OAuthAppPayload) {
+		if (typeof clientId !== "string") {
+			throw new Error("clientId must be a string")
+		}
+
+		const response = await request({
+			method: "PUT",
+			url: `/oauth/apps/${clientId}`,
 			data: payload,
 		})
 
