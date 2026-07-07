@@ -1,5 +1,4 @@
 import EventEmitter from "@foxify/events"
-import xxhash from "xxhash-wasm"
 
 export default class FileUploadBrowser {
 	constructor(params) {
