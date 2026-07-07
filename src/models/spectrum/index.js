@@ -175,6 +175,7 @@ export default class Streaming {
 			...params,
 			url: Streaming.baseUrl,
 			token: SessionModel.token,
+			worker: false,
 		})
 
 		return client
