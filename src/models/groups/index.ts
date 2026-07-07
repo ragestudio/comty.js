@@ -15,6 +15,7 @@ import getAllInvitesMethod from "./methods/getAllInvites"
 import createInviteMethod from "./methods/createInvite"
 import joinWithInviteKeyMethod from "./methods/joinWithInviteKey"
 import deleteInviteMethod from "./methods/deleteInvite"
+import metaGroupMethod from "./methods/metaGroup"
 
 import getSoundpadItem from "./methods/getSoundpadItems"
 import getGroupRTCState from "./methods/getGroupRTCState"
@@ -28,6 +29,7 @@ export default class GroupsModel {
 	static delete = deleteGroupMethod
 	static sort = sortMyGroupsMethod
 	static leave = leaveGroupMethod
+	static meta = metaGroupMethod
 
 	static members = Members
 	static channels = Channels
