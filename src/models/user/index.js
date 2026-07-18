@@ -10,6 +10,7 @@ import updateConfigMethod from "./methods/updateConfig"
 
 import getAvatarMethod from "./methods/getAvatar"
 import isUserConnectedMethod from "./methods/isUserConnected"
+import checkVersionsMethod from "./methods/checkVersions"
 
 import getPublicKeyMethod from "./methods/getPublicKey"
 import updatePublicKeyMethod from "./methods/updatePublicKey"
@@ -88,6 +89,8 @@ export default class User {
 	static getAvatar = getAvatarMethod
 
 	static isUserConnected = isUserConnectedMethod
+
+	static checkVersions = checkVersionsMethod
 
 	static V2 = V2
 }
