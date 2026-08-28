@@ -1,53 +1,103 @@
+import type { Group, MetaGroup } from "@comty/shared/types/spaces/group"
+import type { PaginatedResponse } from "../../types"
+
+import * as v from "valibot"
+import { Validate } from "../../decorators/Validate"
+import { Definition } from "../../decorators/Definition"
+
+import BaseModel from "../../classes/BaseModel"
+
 import Members from "./members"
 import Channels from "./channels"
+import Invites from "./invites"
+import Soundpad from "./soundpad"
+import Rtc from "./rtc"
 
-import getMyGroupsMethod from "./methods/getMyGroups"
-import sortMyGroupsMethod from "./methods/sortGroups"
-import leaveGroupMethod from "./methods/leaveGroup"
+class GroupsModel extends BaseModel {
+	/**
+	 * Get all groups the user is a member of
+	 */
+	@Definition(() => ({ method: "GET", url: `/groups/my` }))
+	getMy: () => Promise<PaginatedResponse<Group>>
 
-import getGroupMethod from "./methods/getGroup"
-import createGroupMethod from "./methods/createGroup"
-import modifyGroupMethod from "./methods/modifyGroup"
-import deleteGroupMethod from "./methods/deleteGroup"
+	/**
+	 * Create a new group
+	 */
+	@Validate(v.object({}))
+	@Definition((payload) => ({
+		method: "POST",
+		url: "/groups/create",
+		data: payload,
+	}))
+	create: (payload: Partial<Group>) => Promise<Group>
 
-import getInviteDataMethod from "./methods/getInviteData"
-import getAllInvitesMethod from "./methods/getAllInvites"
-import createInviteMethod from "./methods/createInvite"
-import joinWithInviteKeyMethod from "./methods/joinWithInviteKey"
-import deleteInviteMethod from "./methods/deleteInvite"
-import metaGroupMethod from "./methods/metaGroup"
+	/**
+	 * Get a group by ID
+	 */
+	@Validate(v.pipe(v.string(), v.minLength(1, "group_id is required")))
+	@Definition((group_id) => ({ method: "GET", url: `/groups/${group_id}` }))
+	get: (group_id: string) => Promise<Group>
 
-import getSoundpadItem from "./methods/getSoundpadItems"
-import getGroupRTCState from "./methods/getGroupRTCState"
+	/**
+	 * Modify a group
+	 */
+	@Validate(
+		v.pipe(v.string(), v.minLength(1, "group_id is required")),
+		v.object({}),
+	)
+	@Definition((group_id, payload) => ({
+		method: "PUT",
+		url: `/groups/${group_id}`,
+		data: payload,
+	}))
+	modify: (group_id: string, payload: Partial<Group>) => Promise<Group>
 
-export default class GroupsModel {
-	static getMy = getMyGroupsMethod
+	/**
+	 * Delete a group
+	 */
+	@Validate(v.pipe(v.string(), v.minLength(1, "group_id is required")))
+	@Definition((group_id) => ({
+		method: "DELETE",
+		url: `/groups/${group_id}`,
+	}))
+	delete: (group_id: string) => Promise<{ success: boolean }>
 
-	static create = createGroupMethod
-	static get = getGroupMethod
-	static modify = modifyGroupMethod
-	static delete = deleteGroupMethod
-	static sort = sortMyGroupsMethod
-	static leave = leaveGroupMethod
-	static meta = metaGroupMethod
+	/**
+	 * Sort groups
+	 */
+	@Validate(v.array(v.string()))
+	@Definition((payload) => ({
+		method: "PUT",
+		url: `/groups/my/sort`,
+		data: payload,
+	}))
+	sort: (payload: string[]) => Promise<{ success: boolean }>
 
-	static members = Members
-	static channels = Channels
+	/**
+	 * Leave a group
+	 */
+	@Validate(v.pipe(v.string(), v.minLength(1, "group_id is required")))
+	@Definition((group_id) => ({
+		method: "POST",
+		url: `/groups/${group_id}/leave`,
+	}))
+	leave: (group_id: string) => Promise<{ success: boolean }>
 
-	static invites = {
-		get: getInviteDataMethod,
-		getAll: getAllInvitesMethod,
-		create: createInviteMethod,
-		join: joinWithInviteKeyMethod,
-		delete: deleteInviteMethod,
-	}
+	/**
+	 * Get group meta
+	 */
+	@Validate(v.pipe(v.string(), v.minLength(1, "group_id is required")))
+	@Definition((group_id) => ({
+		method: "GET",
+		url: `/groups/${group_id}/meta`,
+	}))
+	meta: (group_id: string) => Promise<MetaGroup>
 
-	static soundpad = {
-		getItems: getSoundpadItem,
-		getItem: null,
-	}
-
-	static rtc = {
-		getGroupState: getGroupRTCState,
-	}
+	members = Members
+	channels = Channels
+	invites = Invites
+	soundpad = Soundpad
+	rtc = Rtc
 }
+
+export default new GroupsModel()
