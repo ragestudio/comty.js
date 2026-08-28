@@ -1,9 +1,12 @@
-import Remotes from "./remotes"
-import Storage from "./helpers/withStorage"
+import Remotes from "../remotes"
+import Storage from "./Storage"
 
 import { RTEngineClient } from "linebridge-client"
 
 class WebsocketManager {
+	origin: string
+	sockets = new Map()
+
 	constructor({ origin }) {
 		this.origin = origin
 
@@ -11,8 +14,6 @@ class WebsocketManager {
 			this.sockets.set(remote.namespace, this.createClient(remote))
 		}
 	}
-
-	sockets = new Map()
 
 	createClient(remote) {
 		const client = new RTEngineClient({
