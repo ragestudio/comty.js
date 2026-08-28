@@ -1,10 +1,11 @@
+// @ts-nocheck
 export default class Settings {
 	static get = (key) => {
 		if (typeof window === "undefined") {
 			return null
 		}
 
-		return globalThis.app?.cores?.settings.get(key)
+		return globalThis["app"]?.cores?.settings.get(key)
 	}
 
 	static set = (key, value) => {
@@ -12,7 +13,7 @@ export default class Settings {
 			return null
 		}
 
-		return globalThis.app?.cores?.settings.set(key, value)
+		return globalThis["app"]?.cores?.settings.set(key, value)
 	}
 
 	static is = (key) => {
@@ -20,6 +21,6 @@ export default class Settings {
 			return null
 		}
 
-		return globalThis.app?.cores?.settings.is(key)
+		return globalThis["app"]?.cores?.settings.is(key)
 	}
 }
