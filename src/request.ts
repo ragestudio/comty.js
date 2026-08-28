@@ -1,17 +1,8 @@
+import type { AxiosError, AxiosResponse } from "axios"
+import type { CustomRequest } from "./types"
+
 import handleBeforeRequest from "./helpers/handleBeforeRequest"
 import handleAfterRequest from "./helpers/handleAfterRequest"
-import type {
-	AxiosError,
-	AxiosInstance,
-	AxiosRequestConfig,
-	AxiosResponse,
-} from "axios"
-
-type CustomRequest = AxiosRequestConfig & {
-	instance?: AxiosInstance
-	maxRetries?: number
-	retryDelay?: number
-}
 
 export default async (
 	request = {
@@ -19,7 +10,7 @@ export default async (
 	} as CustomRequest,
 	...args: any[]
 ) => {
-	//@ts-ignore
+	// @ts-ignore
 	const instance = request.instance ?? __comty_shared_state.baseRequest
 
 	if (!instance) {
@@ -41,6 +32,7 @@ export default async (
 
 	let result!: AxiosResponse | AxiosError
 	let retryCount = 0
+
 	const maxRetries = request.maxRetries ?? 3
 	const retryDelay = request.retryDelay ?? 1000
 
