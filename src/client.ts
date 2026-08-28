@@ -112,3 +112,35 @@ export function createClient(options: ClientOptions) {
 }
 
 export default Client
+
+declare global {
+	var __comty_shared_state: any
+	var isServerMode: boolean
+	var b64Decode: (data: any) => string
+	var b64Encode: (data: any) => string
+	var xxhash: any
+
+	interface GlobalThis {
+		__comty_shared_state: any
+		isServerMode: boolean
+		app: any
+	}
+
+	interface Error {
+		code?: string
+		response?: any
+	}
+}
+
+if (globalThis.isServerMode) {
+	const { Buffer } = require("buffer")
+
+	globalThis.b64Decode = (data: any) => {
+		return Buffer.from(data, "base64").toString("utf-8")
+	}
+	globalThis.b64Encode = (data: any) => {
+		return Buffer.from(data, "utf-8").toString("base64")
+	}
+}
+
+/// <reference path="./globals.d.ts" />

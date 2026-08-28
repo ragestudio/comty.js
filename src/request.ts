@@ -10,7 +10,6 @@ export default async (
 	} as CustomRequest,
 	...args: any[]
 ) => {
-	// @ts-ignore
 	const instance = request.instance ?? __comty_shared_state.baseRequest
 
 	if (!instance) {
