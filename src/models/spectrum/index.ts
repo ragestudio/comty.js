@@ -106,10 +106,7 @@ export class SpectrumModel extends BaseModel {
 			data: restreamData,
 		}
 	})
-	addRestreamToProfile: (
-		profileId: string,
-		restreamData: any,
-	) => Promise<any>
+	addRestreamToProfile: (profileId: string, restreamData: any) => Promise<any>
 
 	@Validate(v.pipe(v.string(), v.minLength(1)))
 	@Definition(function (this: SpectrumModel, profileId, restreamIndexData) {
@@ -158,6 +155,7 @@ export class SpectrumModel extends BaseModel {
 			if (typeof _destroy === "function") _destroy()
 		}
 
+		// @ts-ignore
 		client.requestState = async () => {
 			return await client.call("stream:state", stream_id)
 		}
