@@ -3,8 +3,8 @@ const envOrigins = {
 	// 	? "http://localhost:9000"
 	// 	: `${globalThis.location?.origin}/api`,
 	//development: "http://127.0.0.1:9000",
-	development: "https://indev-api.comty.app",
-	indev: "https://indev-api.comty.app",
+	development: "https://indev.comty.app/api",
+	indev: "https://indev.comty.app/api",
 	production: "https://api.comty.app",
 }
 

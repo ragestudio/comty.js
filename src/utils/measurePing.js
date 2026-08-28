@@ -46,7 +46,7 @@ const fetchers = {
 		}),
 }
 
-export default async ({ select } = {}) => {
+export default async ({ select } = { select: [] }) => {
 	let selectedPromises = []
 
 	if (Array.isArray(select)) {

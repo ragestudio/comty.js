@@ -1,8 +1,10 @@
 import SessionModel from "../models/session"
 
 export default async () => {
-	__comty_shared_state.eventBus.emit("session:refreshing")
-	__comty_shared_state.refreshingToken = true
+	if (__comty_shared_state) {
+		__comty_shared_state.eventBus.emit("session:refreshing")
+		__comty_shared_state.refreshingToken = true
+	}
 
 	// send request to regenerate token
 	const response = await __comty_shared_state
@@ -20,13 +22,11 @@ export default async () => {
 
 	if (!response) {
 		__comty_shared_state.refreshingToken = false
-
 		throw new Error("Failed to regenerate token.")
 	}
 
 	if (!response.data?.token) {
 		__comty_shared_state.refreshingToken = false
-
 		throw new Error("Failed to regenerate token, invalid server response.")
 	}
 
