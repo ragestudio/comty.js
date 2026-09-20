@@ -7,10 +7,10 @@ export class DMModel extends BaseModel {
 	 */
 	@Definition((params) => ({
 		method: "GET",
-		url: `/chats/dm/`,
+		url: `/chats/dm`,
 		params: params,
 	}))
-	list: (params?: object) => Promise<object>
+	list: (params?: object) => Promise<Record<string, any>>
 
 	messages = new DMMessagesMethods()
 }
@@ -24,7 +24,7 @@ class DMMessagesMethods extends BaseModel {
 		url: `/chats/dm/${to_user_id}`,
 		params: params,
 	}))
-	get: (to_user_id: string, params?: object) => Promise<object>
+	get: (to_user_id: string, params?: object) => Promise<Record<string, any>>
 
 	/**
 	 * Send a message to a DM chat
@@ -34,7 +34,7 @@ class DMMessagesMethods extends BaseModel {
 		url: `/chats/dm/${to_user_id}`,
 		data: payload,
 	}))
-	send: (to_user_id: string, payload: object) => Promise<object>
+	send: (to_user_id: string, payload: object) => Promise<Record<string, any>>
 
 	/**
 	 * Delete a message from a DM chat
@@ -43,7 +43,10 @@ class DMMessagesMethods extends BaseModel {
 		method: "DELETE",
 		url: `/chats/dm/${to_user_id}/${message_id}`,
 	}))
-	delete: (to_user_id: string, message_id: string) => Promise<object>
+	delete: (
+		to_user_id: string,
+		message_id: string,
+	) => Promise<Record<string, any>>
 }
 
 export default new DMModel()

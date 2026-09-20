@@ -154,15 +154,15 @@ export class UserModel extends BaseModel {
 	}))
 	checkVersions: (platform: string) => Promise<any>
 
-	V2 = new UserV2()
+	decorations = new UserDecorations()
 }
 
-export class UserV2 extends BaseModel {
+export class UserDecorations extends BaseModel {
 	@Definition((user_id) => ({
 		method: "GET",
-		url: `/v2/users/${user_id}/decorations`,
+		url: `/users/${user_id}/decorations`,
 	}))
-	getDecorations: (user_id: string) => Promise<any>
+	get: (user_id: string) => Promise<any>
 }
 
 export default new UserModel()

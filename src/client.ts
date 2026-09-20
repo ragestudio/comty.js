@@ -27,6 +27,7 @@ export class Client {
 	baseRequest: AxiosInstance
 	origin: string = remotes.origin
 	decTokenStore = new Map()
+	refreshingToken: any
 
 	xxhashInstance: XXHashAPI
 
@@ -114,16 +115,15 @@ export function createClient(options: ClientOptions) {
 export default Client
 
 declare global {
-	var __comty_shared_state: any
+	var __comty_shared_state: Client | undefined
 	var isServerMode: boolean
 	var b64Decode: (data: any) => string
 	var b64Encode: (data: any) => string
 	var xxhash: any
 
 	interface GlobalThis {
-		__comty_shared_state: any
+		__comty_shared_state: Client | undefined
 		isServerMode: boolean
-		app: any
 	}
 
 	interface Error {

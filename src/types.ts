@@ -22,6 +22,7 @@ export type CustomRequest = AxiosRequestConfig & {
 
 export interface EventEmitterLike {
 	on(event: string | symbol, listener: (...args: any[]) => void): any
+	once(event: string | symbol, listener: (...args: any[]) => void): any
 	off?(event: string | symbol, listener: (...args: any[]) => void): any
 	removeListener?(
 		event: string | symbol,

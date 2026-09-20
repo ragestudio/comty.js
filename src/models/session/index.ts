@@ -136,7 +136,7 @@ export class Session extends BaseModel {
 		})
 
 		this.removeToken()
-		__comty_shared_state.eventBus.emit("session:destroyed")
+		globalThis.__comty_shared_state.eventBus.emit("session:destroyed")
 
 		return response ? response.data : false
 	}

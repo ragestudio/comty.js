@@ -26,6 +26,12 @@ export default async function (
 		return false
 	}
 
+	if (response.data.activation_required) {
+		const error = new Error("Activation required") as any
+		error.response = { data: response.data }
+		throw error
+	}
+
 	this.SessionModel.token = response.data.token
 	this.SessionModel.refreshToken = response.data.refreshToken
 

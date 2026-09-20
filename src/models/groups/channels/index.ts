@@ -32,7 +32,7 @@ class GroupChannels extends BaseModel {
 		method: "GET",
 		url: `/groups/${group_id}/channels/${channel_id}`,
 	}))
-	get: (group_id: string, channel_id: string) => Promise<ChannelMethods>
+	get: (group_id: string, channel_id: string) => Promise<Channel>
 
 	/**
 	 * Create a new channel for a given group_id

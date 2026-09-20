@@ -6,9 +6,11 @@ export default async () => {
 		__comty_shared_state.refreshingToken = true
 	}
 
-	// send request to regenerate token
-	const response = await __comty_shared_state
-		.baseRequest({
+	let response
+
+	try {
+		// send request to regenerate token
+		response = await __comty_shared_state.baseRequest({
 			method: "POST",
 			url: "/auth",
 			data: {
@@ -16,27 +18,29 @@ export default async () => {
 				refreshToken: await SessionModel.refreshToken,
 			},
 		})
-		.catch((error) => {
-			return false
-		})
 
-	if (!response) {
+		if (!response.data?.token) {
+			throw new Error(
+				"Failed to regenerate token, invalid server response.",
+			)
+		}
+
+		// set new token
+		SessionModel.token = response.data.token
+		SessionModel.refreshToken = response.data.refreshToken
+
+		// emit event
+		__comty_shared_state.eventBus.emit("session:refreshed")
 		__comty_shared_state.refreshingToken = false
-		throw new Error("Failed to regenerate token.")
-	}
-
-	if (!response.data?.token) {
+	} catch (err) {
 		__comty_shared_state.refreshingToken = false
-		throw new Error("Failed to regenerate token, invalid server response.")
+
+		if (response?.status !== 200) {
+			throw new Error("Failed to regenerate token.")
+		} else {
+			throw err
+		}
 	}
-
-	// set new token
-	SessionModel.token = response.data.token
-	SessionModel.refreshToken = response.data.refreshToken
-
-	// emit event
-	__comty_shared_state.eventBus.emit("session:refreshed")
-	__comty_shared_state.refreshingToken = false
 
 	return true
 }
