@@ -40,7 +40,7 @@ export class AuthModel extends BaseModel {
 		url: "/auth/token",
 		data: { token },
 	}))
-	authToken: (token?: string) => Promise<object>
+	authToken: (token?: string) => Promise<Record<string, any>>
 
 	/**
 	 * Validates the existence/validity of a username
@@ -62,7 +62,10 @@ export class AuthModel extends BaseModel {
 			email: payload.email,
 		},
 	}))
-	availability: (payload: { username: string; email: string }) => Promise<object | boolean>
+	availability: (payload: {
+		username: string
+		email: string
+	}) => Promise<object | boolean>
 
 	/**
 	 * Changes the current logged user password
@@ -82,7 +85,7 @@ export class AuthModel extends BaseModel {
 		newPassword: string
 		code?: string
 		verificationToken?: string
-	}) => Promise<object>
+	}) => Promise<Record<string, any>>
 
 	/**
 	 * Activates a user account using the provided activation code
@@ -95,7 +98,10 @@ export class AuthModel extends BaseModel {
 			user_id: user_id,
 		},
 	}))
-	activateAccount: (user_id: string, code: string) => Promise<object>
+	activateAccount: (
+		user_id: string,
+		code: string,
+	) => Promise<Record<string, any>>
 
 	/**
 	 * Resends the activation code to the user
@@ -105,7 +111,7 @@ export class AuthModel extends BaseModel {
 		url: "/auth/resend-activation-code",
 		data: { user_id },
 	}))
-	resendActivationCode: (user_id: string) => Promise<object>
+	resendActivationCode: (user_id: string) => Promise<Record<string, any>>
 
 	/**
 	 * Disables the current user account
@@ -122,7 +128,7 @@ export class AuthModel extends BaseModel {
 		url: "/auth/recover-password",
 		data: { account: usernameOrEmail },
 	}))
-	recoverPassword: (usernameOrEmail: string) => Promise<object>
+	recoverPassword: (usernameOrEmail: string) => Promise<Record<string, any>>
 }
 
 export default new AuthModel()

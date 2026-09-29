@@ -9,7 +9,7 @@ export class E2EModel extends BaseModel {
 		method: "GET",
 		url: "/users/self/keypair",
 	}))
-	getKeyPair: () => Promise<object>
+	getKeyPair: () => Promise<Record<string, any>>
 
 	/**
 	 * Updates the user key pair on the server.
@@ -28,7 +28,10 @@ export class E2EModel extends BaseModel {
 			data: { str: str },
 		}
 	})
-	updateKeyPair_: (str: string, opts?: { imSure?: boolean }) => Promise<object>
+	updateKeyPair_: (
+		str: string,
+		opts?: { imSure?: boolean },
+	) => Promise<Record<string, any>>
 }
 
 export default new E2EModel()

@@ -10,7 +10,8 @@ export default async (
 	} as CustomRequest,
 	...args: any[]
 ) => {
-	const instance = request.instance ?? __comty_shared_state.baseRequest
+	const instance =
+		request.instance ?? globalThis.__comty_shared_state.baseRequest
 
 	if (!instance) {
 		throw new Error("No instance provided")
@@ -36,6 +37,7 @@ export default async (
 	const retryDelay = request.retryDelay ?? 1000
 
 	const makeRequest = async () => {
+		// @ts-ignore
 		result = await instance(request, ...args).catch((error: any) => {
 			return error
 		})

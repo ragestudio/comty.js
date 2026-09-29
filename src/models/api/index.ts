@@ -9,7 +9,7 @@ class APIModel extends BaseModel {
 		method: "GET",
 		url: "/server-keys/my",
 	}))
-	getMyServerKeys: () => Promise<object>
+	getMyServerKeys: () => Promise<Record<string, any>>
 
 	/**
 	 * Creates a new server key.
@@ -19,7 +19,11 @@ class APIModel extends BaseModel {
 		url: "/server-keys/generate",
 		data: { name, description, access },
 	}))
-	createNewServerKey: (payload: { name: string; description?: string; access: string }) => Promise<object>
+	createNewServerKey: (payload: {
+		name: string
+		description?: string
+		access: string
+	}) => Promise<Record<string, any>>
 
 	/**
 	 * Regenerates a secret token for a server key.
@@ -28,7 +32,7 @@ class APIModel extends BaseModel {
 		method: "POST",
 		url: `/server-keys/${access_id}/regenerate`,
 	}))
-	regenerateSecretToken: (access_id: string) => Promise<object>
+	regenerateSecretToken: (access_id: string) => Promise<Record<string, any>>
 
 	/**
 	 * Deletes a server key by its access ID.
@@ -38,7 +42,7 @@ class APIModel extends BaseModel {
 		url: `/server-keys/${access_id}`,
 		data: { access_id },
 	}))
-	deleteServerKey: (access_id: string) => Promise<object>
+	deleteServerKey: (access_id: string) => Promise<Record<string, any>>
 }
 
 export default new APIModel()

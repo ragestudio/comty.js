@@ -15,7 +15,11 @@ export class Channels extends BaseModel {
 		url: `/chats/channels/${group_id}/${channel_id}/sync`,
 		params: params,
 	}))
-	sync: (group_id: string, channel_id: string, params?: SyncParams) => Promise<object>
+	sync: (
+		group_id: string,
+		channel_id: string,
+		params?: SyncParams,
+	) => Promise<Record<string, any>>
 
 	messages = new ChannelsMessagesMethods()
 }
@@ -29,7 +33,11 @@ class ChannelsMessagesMethods extends BaseModel {
 		url: `/chats/channels/${group_id}/${channel_id}`,
 		params: params,
 	}))
-	get: (group_id: string, channel_id: string, params?: any) => Promise<object>
+	get: (
+		group_id: string,
+		channel_id: string,
+		params?: any,
+	) => Promise<Record<string, any>>
 
 	/**
 	 * Send a message to a channel chat by group and channel ID.
@@ -39,7 +47,11 @@ class ChannelsMessagesMethods extends BaseModel {
 		url: `/chats/channels/${group_id}/${channel_id}`,
 		data: payload,
 	}))
-	send: (group_id: string, channel_id: string, payload?: any) => Promise<object>
+	send: (
+		group_id: string,
+		channel_id: string,
+		payload?: any,
+	) => Promise<Record<string, any>>
 
 	/**
 	 * Delete a message from a channel chat by group and channel ID
@@ -48,7 +60,11 @@ class ChannelsMessagesMethods extends BaseModel {
 		method: "DELETE",
 		url: `/chats/channels/${group_id}/${channel_id}/${message_id}`,
 	}))
-	delete: (group_id: string, channel_id: string, message_id: string) => Promise<object>
+	delete: (
+		group_id: string,
+		channel_id: string,
+		message_id: string,
+	) => Promise<Record<string, any>>
 }
 
 export default new Channels()

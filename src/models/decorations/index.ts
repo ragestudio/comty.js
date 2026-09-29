@@ -6,7 +6,7 @@ export class DecorationsModel extends BaseModel {
 	 * Get decorations by ID(s)
 	 */
 	@Definition((ids) => {
-		let query = ids;
+		let query = ids
 		if (Array.isArray(ids)) {
 			query = ids.join(",")
 		}
@@ -16,7 +16,7 @@ export class DecorationsModel extends BaseModel {
 			url: `/decorations/${query}`,
 		}
 	})
-	data: (ids: string | string[]) => Promise<object>
+	data: (ids: string | string[]) => Promise<Record<string, any>>
 }
 
 export default new DecorationsModel()

@@ -9,7 +9,7 @@ export class EventsModel extends BaseModel {
 		method: "GET",
 		url: "/featured/events",
 	}))
-	getFeatured: () => Promise<object>
+	getFeatured: () => Promise<Record<string, any>>
 
 	/*
 	 * Get a event data
@@ -18,7 +18,7 @@ export class EventsModel extends BaseModel {
 		method: "GET",
 		url: `/events/${id}/data`,
 	}))
-	data: (id: string) => Promise<object>
+	data: (id: string) => Promise<Record<string, any>>
 }
 
 export default new EventsModel()

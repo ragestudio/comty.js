@@ -15,7 +15,7 @@ export class FollowsModel extends BaseModel {
 		method: "GET",
 		url: `/users/${user_id}/following`,
 	}))
-	imFollowing: (user_id: string) => Promise<Object>
+	imFollowing: (user_id: string) => Promise<Record<string, any>>
 
 	/**
 	 * Retrieves the list of followers for a given user.
@@ -31,7 +31,10 @@ export class FollowsModel extends BaseModel {
 			params: params,
 		}
 	})
-	getFollowers: (user_id?: string, params?: object) => Promise<Object>
+	getFollowers: (
+		user_id?: string,
+		params?: object,
+	) => Promise<Record<string, any>>
 
 	/**
 	 * Toggles the follow status for a user.
@@ -41,7 +44,11 @@ export class FollowsModel extends BaseModel {
 		method: "POST",
 		url: `/users/${user_id}/follow`,
 	}))
-	toggleFollow: ({ user_id }: { user_id: string }) => Promise<Object>
+	toggleFollow: ({
+		user_id,
+	}: {
+		user_id: string
+	}) => Promise<Record<string, any>>
 }
 
 export default new FollowsModel()
