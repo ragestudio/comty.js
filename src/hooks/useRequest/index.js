@@ -1,6 +1,9 @@
 import React from "react"
 
-export default (method, ...args) => {
+/**
+ * @deprecated "useRequest" is deprecated. Use "use" instead.
+ */
+export const useRequest = (method, ...args) => {
 	const [loading, setLoading] = React.useState(true)
 	const [result, setResult] = React.useState(null)
 	const [error, setError] = React.useState(null)
@@ -41,3 +44,5 @@ export default (method, ...args) => {
 		setResult,
 	]
 }
+
+export default useRequest
