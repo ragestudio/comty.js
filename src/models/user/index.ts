@@ -1,3 +1,5 @@
+import type { User } from "@comty/shared/types/user"
+
 import BaseModel from "../../classes/BaseModel"
 
 import * as v from "valibot"
@@ -42,6 +44,12 @@ export class UserModel extends BaseModel {
 
 		return response.data
 	}
+
+	@Definition(() => ({
+		method: "GET",
+		url: "/users/self",
+	}))
+	self: () => Promise<User>
 
 	/**
 	 * Updates the user data with the given payload.
