@@ -12,7 +12,7 @@ class FeedModel extends BaseModel {
 			url: `/music/feed/my`,
 			params: {
 				page: page ?? 0,
-				limit: limit ?? this.settings.get("feed_max_fetch"),
+				limit: limit ?? 50,
 			},
 		}),
 	)
@@ -26,7 +26,7 @@ class FeedModel extends BaseModel {
 			url: `/music/feed`,
 			params: {
 				page: page ?? 0,
-				limit: limit ?? this.settings.get("feed_max_fetch"),
+				limit: limit ?? 50,
 			},
 		}),
 	)
@@ -40,7 +40,7 @@ class FeedModel extends BaseModel {
 			url: `/posts/feed/timeline`,
 			params: {
 				page: page ?? 0,
-				limit: limit ?? this.settings.get("feed_max_fetch"),
+				limit: limit ?? 50,
 			},
 		}),
 	)
@@ -55,7 +55,7 @@ class FeedModel extends BaseModel {
 		url: `/posts/feed/global`,
 		params: {
 			page: page ?? 0,
-			limit: limit ?? this.settings.get("feed_max_fetch"),
+			limit: limit ?? 50,
 		},
 	}))
 }

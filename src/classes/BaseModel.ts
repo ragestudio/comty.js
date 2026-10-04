@@ -1,7 +1,6 @@
 import type { CustomRequest } from "../types"
 
 import Request from "../request"
-import Settings from "./Settings"
 import Storage from "./Storage"
 
 export default class BaseModel {
@@ -32,10 +31,6 @@ export default class BaseModel {
 
 	get request() {
 		return Request
-	}
-
-	get settings() {
-		return Settings
 	}
 
 	get storage() {
