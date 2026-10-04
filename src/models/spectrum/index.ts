@@ -1,4 +1,4 @@
-import { RTEngineClient } from "linebridge-client"
+import { WebsocketClient } from "@linebridge/client"
 import BaseModel from "../../classes/BaseModel"
 
 import * as v from "valibot"
@@ -133,7 +133,7 @@ export class SpectrumModel extends BaseModel {
 	}
 
 	createWebsocket(params: any = {}) {
-		return new RTEngineClient({
+		return new WebsocketClient({
 			...params,
 			url: this.baseUrl,
 			token: SessionModel.token,
