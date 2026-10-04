@@ -13,10 +13,6 @@ import remotes from "./remotes"
 import pkg from "../package.json"
 
 export class Client {
-	static get isServerMode() {
-		return typeof window === "undefined" && typeof global !== "undefined"
-	}
-
 	get version() {
 		return pkg.version
 	}
@@ -51,7 +47,7 @@ export class Client {
 		}
 
 		// if credentials are provided, store them
-		if (options.privateKey && options.accessKey && Client.isServerMode) {
+		if (options.privateKey && options.accessKey && options.server) {
 			Storage.engine.set(
 				"token",
 				`${options.privateKey}:${options.accessKey}`,
@@ -117,8 +113,6 @@ export default Client
 declare global {
 	var __comty_shared_state: Client | undefined
 	var isServerMode: boolean
-	var b64Decode: (data: any) => string
-	var b64Encode: (data: any) => string
 	var xxhash: any
 
 	interface GlobalThis {
@@ -131,16 +125,3 @@ declare global {
 		response?: any
 	}
 }
-
-if (globalThis.isServerMode) {
-	const { Buffer } = require("buffer")
-
-	globalThis.b64Decode = (data: any) => {
-		return Buffer.from(data, "base64").toString("utf-8")
-	}
-	globalThis.b64Encode = (data: any) => {
-		return Buffer.from(data, "utf-8").toString("base64")
-	}
-}
-
-/// <reference path="./globals.d.ts" />
