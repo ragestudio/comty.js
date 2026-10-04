@@ -1,4 +1,12 @@
-export default (base, obj) => {
+type StdList = {
+	items: any[]
+	total_items: number
+}
+
+export default (
+	base: Record<string, StdList>,
+	obj: Record<string, StdList>,
+) => {
 	const validGroups = Object.keys(obj).filter(
 		(key) => Array.isArray(obj[key]?.items) && obj[key].items.length > 0,
 	)
