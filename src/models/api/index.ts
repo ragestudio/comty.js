@@ -1,7 +1,7 @@
 import BaseModel from "../../classes/BaseModel"
 import { Definition } from "../../decorators/Definition"
 
-class APIModel extends BaseModel {
+export class APIModel extends BaseModel {
 	/**
 	 * Retrieves the server keys associated with the current user.
 	 */
