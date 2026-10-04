@@ -37,6 +37,7 @@ export type WebsocketManagerParams = {
 }
 
 export type ClientOptions = {
+	server?: boolean
 	origin?: string
 	accessKey?: string
 	privateKey?: string
