@@ -1,13 +1,13 @@
 {
 	"name": "comty.js",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"description": "Official Comty API for JavaScript",
 	"homepage": "https://github.com/ragestudio/comty.js",
 	"author": "RageStudio <support@ragestudio.net>",
 	"license": "MIT",
 	"type": "module",
 	"types": "./dist/index.d.ts",
-	"main": "./dist/index.js",
+	"main": "./dist/index.ts",
 	"scripts": {
 		"build": "tsc",
 		"typecheck": "tsc --noEmit"
@@ -30,7 +30,7 @@
 		"js-cookie": "^3.0.8",
 		"jsonwebtoken": "^9.0.3",
 		"jwt-decode": "^4.0.0",
-		"linebridge-client": "workspace:*",
+		"@linebridge/client": "workspace:*",
 		"luxon": "^3.7.2",
 		"valibot": "^1.4.2",
 		"xxhash-wasm": "^1.1.0"
