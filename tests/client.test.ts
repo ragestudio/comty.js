@@ -23,7 +23,7 @@ vi.mock("@linebridge/client", () => {
 
 import { Client } from "../src/core/client"
 import remotes from "../src/core/remotes"
-import { MemoryStorageDriver } from "../src/core/storage/storage"
+import { MemoryStorageDriver } from "../src/core/storage/memory"
 import session from "../src/core/session"
 
 type MockResponse = { status: number; data?: any }
