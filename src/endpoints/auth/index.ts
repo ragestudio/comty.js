@@ -44,7 +44,7 @@ export class AuthModel extends BaseEndpoint {
 		method: "get",
 		url: `/auth/${username}/exists`,
 	}))
-	usernameValidation!: (username: string) => Promise<boolean | object>
+	usernameValidation!: (username: string) => Promise<{ exists: boolean }>
 
 	/**
 	 * Retrieves the availability of a username and email
