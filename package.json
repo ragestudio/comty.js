@@ -54,7 +54,7 @@
 		"@comty/shared": "workspace:*",
 		"@foxify/events": "^2.1.0",
 		"@linebridge/client": "workspace:*",
-		"axios": "^1.20.0",
+		"axios": "^1.21.0",
 		"js-cookie": "^3.0.8",
 		"jwt-decode": "^4.0.0",
 		"valibot": "^1.4.2",
@@ -64,7 +64,7 @@
 		"@types/js-cookie": "^3.0.6",
 		"@types/node": "^26.4.0",
 		"@types/react": "^19.3.0",
-		"tsc-alias": "^1.9.7",
+		"tsc-alias": "^1.9.9",
 		"typescript": "^7.0.2",
 		"vitest": "^4.1.11"
 	}
