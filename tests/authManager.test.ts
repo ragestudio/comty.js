@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import EventEmitter from "@foxify/events"
+import { EventEmitter } from "tseep"
 
 vi.mock("@linebridge/client", () => {
 	class WebsocketClient {

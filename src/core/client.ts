@@ -8,7 +8,7 @@ import type { ClientAuthPlugin, ClientOptions } from "../types"
 
 import pkg from "../../package.json"
 import axios from "axios"
-import EventEmitter from "@foxify/events"
+import { EventEmitter } from "tseep"
 
 import AddonsManager from "./addons/AddonsManager"
 import Realtime from "./realtime"

@@ -2,7 +2,7 @@ import type { User } from "@comty/shared/types/user"
 import type { DecodedAuthToken } from "@comty/shared/types/session"
 
 import { jwtDecode } from "jwt-decode"
-import EventEmitter from "@foxify/events"
+import { EventEmitter } from "tseep"
 
 import client from "../client"
 import session from "../session"

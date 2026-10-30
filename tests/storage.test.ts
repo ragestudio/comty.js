@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import Storage, {
-	CookieStorageDriver,
-	MemoryStorageDriver,
-	resolveStorageDriver,
-} from "../src/core/storage"
+import { CookieStorageDriver } from "../src/core/storage/cookie"
+import { MemoryStorageDriver } from "../src/core/storage/memory"
+import Storage, { resolveStorageDriver } from "../src/core/storage/storage"
 
 describe("storage engine", () => {
 	it("resolves to the memory driver outside the browser", () => {
