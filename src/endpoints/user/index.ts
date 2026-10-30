@@ -125,24 +125,24 @@ export class UserModel extends BaseEndpoint {
 	updatePublicKey!: (key: string) => Promise<any>
 
 	@Definition(() => ({
-		method: "POST",
-		url: "/users/self/totp/generate",
+		method: "GET",
+		url: "/users/self/2fa/generate",
 	}))
 	generateTotp!: () => Promise<any>
 
-	@Definition((token) => ({
+	@Definition((code) => ({
 		method: "POST",
-		url: "/users/self/totp/enable",
-		data: { token },
+		url: "/users/self/2fa/enable",
+		data: { code },
 	}))
-	enableTotp!: (token: string) => Promise<any>
+	enableTotp!: (code: string) => Promise<any>
 
-	@Definition((token) => ({
-		method: "POST",
-		url: "/users/self/totp/disable",
-		data: { token },
+	@Definition((code) => ({
+		method: "DELETE",
+		url: "/users/self/2fa",
+		data: { code },
 	}))
-	disableTotp!: (token: string) => Promise<any>
+	disableTotp!: (code: string) => Promise<any>
 
 	@Definition((user_id) => ({
 		method: "GET",
