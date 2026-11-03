@@ -50,6 +50,7 @@ export type AuthEventMap = {
 	"session:refreshing": () => void
 	"session:refreshed": (data: AuthResponse) => void
 	"session:invalid": (message: string) => void
+	"auth:unauthenticated": () => void
 	error: (error: Error) => void
 }
 

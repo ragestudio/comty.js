@@ -27,14 +27,29 @@ export function resolveStorageDriver(): StorageDriver {
 
 export class Storage<K extends string = string> {
 	private cache = new Map<K, string>()
-	private driver: StorageDriver
+	private driver?: StorageDriver
+	private fallbackDriver?: StorageDriver
 
-	constructor(driver: StorageDriver = resolveStorageDriver()) {
+	// the driver is resolved lazily so that a global driver registered after
+	// this instance is created (native secure store) is still honored
+	constructor(driver?: StorageDriver) {
 		this.driver = driver
 	}
 
 	setDriver(driver: StorageDriver) {
 		this.driver = driver
+	}
+
+	private getDriver() {
+		if (this.driver) return this.driver
+		if (registeredDriver) return registeredDriver
+
+		// keep the fallback per instance, a memory driver is stateful
+		if (!this.fallbackDriver) {
+			this.fallbackDriver = resolveStorageDriver()
+		}
+
+		return this.fallbackDriver
 	}
 
 	get(key: K): string | undefined {
@@ -46,19 +61,19 @@ export class Storage<K extends string = string> {
 
 		this.cache.set(key, value)
 
-		return this.persist(() => this.driver.setItem(key, value))
+		return this.persist(() => this.getDriver().setItem(key, value))
 	}
 
 	delete(key: K) {
 		this.cache.delete(key)
 
-		return this.persist(() => this.driver.removeItem(key))
+		return this.persist(() => this.getDriver().removeItem(key))
 	}
 
 	prime(keys: K[]) {
 		for (const key of keys) {
 			try {
-				const value = this.driver.getItem(key)
+				const value = this.getDriver().getItem(key)
 
 				if (!(value instanceof Promise) && value != null) {
 					this.cache.set(key, value)
@@ -73,7 +88,7 @@ export class Storage<K extends string = string> {
 		await Promise.all(
 			keys.map(async (key) => {
 				try {
-					const value = await this.driver.getItem(key)
+					const value = await this.getDriver().getItem(key)
 
 					if (value != null) this.cache.set(key, value)
 				} catch (error) {

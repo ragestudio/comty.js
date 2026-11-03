@@ -261,6 +261,9 @@ export class AuthManager extends EventEmitter<AuthEventMap> {
 				initialized: true,
 				authenticated: false,
 			})
+
+			this.emit("auth:unauthenticated")
+
 			return false
 		}
 
