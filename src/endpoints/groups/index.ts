@@ -1,4 +1,8 @@
-import type { Group, MetaGroup } from "@comty/shared/types/spaces/group"
+import type {
+	Group,
+	GroupViewer,
+	MetaGroup,
+} from "@comty/shared/types/spaces/group"
 import type { PaginatedResponse } from "../../types"
 
 import * as v from "valibot"
@@ -11,6 +15,7 @@ import Members from "./members"
 import Channels from "./channels"
 import Invites from "./invites"
 import Soundpad from "./soundpad"
+import Roles from "./roles"
 import Rtc from "./rtc"
 
 class GroupsModel extends BaseEndpoint {
@@ -23,7 +28,7 @@ class GroupsModel extends BaseEndpoint {
 	/**
 	 * Create a new group
 	 */
-	@Validate(v.object({}))
+	@Validate(v.any())
 	@Definition((payload) => ({
 		method: "POST",
 		url: "/groups/create",
@@ -41,10 +46,7 @@ class GroupsModel extends BaseEndpoint {
 	/**
 	 * Modify a group
 	 */
-	@Validate(
-		v.pipe(v.string(), v.minLength(1, "group_id is required")),
-		v.object({}),
-	)
+	@Validate(v.pipe(v.string(), v.minLength(1, "group_id is required")), v.any())
 	@Definition((group_id, payload) => ({
 		method: "PUT",
 		url: `/groups/${group_id}`,
@@ -93,10 +95,35 @@ class GroupsModel extends BaseEndpoint {
 	}))
 	meta!: (group_id: string) => Promise<MetaGroup>
 
+	/**
+	 * Transfer the group ownership to another member
+	 */
+	@Validate(
+		v.pipe(v.string(), v.minLength(1, "group_id is required")),
+		v.pipe(v.string(), v.minLength(1, "user_id is required")),
+	)
+	@Definition((group_id, user_id) => ({
+		method: "POST",
+		url: `/groups/${group_id}/transfer-ownership`,
+		data: { user_id },
+	}))
+	transferOwnership!: (group_id: string, user_id: string) => Promise<Group>
+
+	/**
+	 * Get the viewer permissions and roles for a group
+	 */
+	@Validate(v.pipe(v.string(), v.minLength(1, "group_id is required")))
+	@Definition((group_id) => ({
+		method: "GET",
+		url: `/groups/${group_id}/permissions`,
+	}))
+	permissions!: (group_id: string) => Promise<GroupViewer>
+
 	members = Members
 	channels = Channels
 	invites = Invites
 	soundpad = Soundpad
+	roles = Roles
 	rtc = Rtc
 }
 

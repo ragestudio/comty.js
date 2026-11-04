@@ -37,10 +37,7 @@ class GroupChannels extends BaseEndpoint {
 	/**
 	 * Create a new channel for a given group_id
 	 */
-	@Validate(
-		v.pipe(v.string(), v.minLength(1, "group_id is required")),
-		v.object({}),
-	)
+	@Validate(v.pipe(v.string(), v.minLength(1, "group_id is required")), v.any())
 	@Definition((group_id, payload) => ({
 		method: "POST",
 		url: `/groups/${group_id}/channels/create`,
@@ -72,7 +69,7 @@ class ChannelMethods extends BaseEndpoint {
 	@Validate(
 		v.pipe(v.string(), v.minLength(1, "group_id is required")),
 		v.pipe(v.string(), v.minLength(1, "channel_id is required")),
-		v.object({}),
+		v.any(),
 	)
 	@Definition(
 		(group_id: string, channel_id: string, payload: Partial<Channel>) => ({
@@ -93,7 +90,6 @@ class ChannelMethods extends BaseEndpoint {
 	@Validate(
 		v.pipe(v.string(), v.minLength(1, "group_id is required")),
 		v.pipe(v.string(), v.minLength(1, "channel_id is required")),
-		v.object({}),
 	)
 	@Definition((group_id: string, channel_id: string) => ({
 		method: "DELETE",

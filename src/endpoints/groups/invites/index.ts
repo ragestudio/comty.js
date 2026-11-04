@@ -39,10 +39,7 @@ class GroupInvites extends BaseEndpoint {
 	/**
 	 * Create a new group invite for a given group_id
 	 */
-	@Validate(
-		v.pipe(v.string(), v.minLength(1, "group_id is required")),
-		v.object({}),
-	)
+	@Validate(v.pipe(v.string(), v.minLength(1, "group_id is required")), v.any())
 	@Definition((group_id, payload) => ({
 		method: "POST",
 		url: `/groups/${group_id}/invites/create`,

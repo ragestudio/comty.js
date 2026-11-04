@@ -1,5 +1,4 @@
 import type { SoundpadItemPayload } from "@comty/shared/types/spaces/soundpad"
-import type { PaginatedResponse } from "../../../types"
 
 import * as v from "valibot"
 import { Validate } from "../../../core/endpoint/decorators/Validate"
@@ -16,9 +15,7 @@ class GroupSoundpad extends BaseEndpoint {
 		method: "GET",
 		url: `/groups/${group_id}/soundpad/items`,
 	}))
-	getItems!: (
-		group_id: string,
-	) => Promise<PaginatedResponse<SoundpadItemPayload>>
+	getItems!: (group_id: string) => Promise<SoundpadItemPayload[]>
 
 	/**
 	 * Get a soundpad item by ID
@@ -32,6 +29,43 @@ class GroupSoundpad extends BaseEndpoint {
 		url: `/groups/${group_id}/soundpad/items/${item_id}`,
 	}))
 	getItem!: (group_id: string, item_id: string) => Promise<SoundpadItemPayload>
+
+	/**
+	 * Add a new soundpad item to a group
+	 */
+	@Validate(
+		v.pipe(v.string(), v.minLength(1, "group_id is required")),
+		v.object({
+			icon: v.pipe(v.string(), v.minLength(1)),
+			name: v.pipe(v.string(), v.minLength(1)),
+			src: v.pipe(v.string(), v.minLength(1)),
+		}),
+	)
+	@Definition((group_id, payload) => ({
+		method: "POST",
+		url: `/groups/${group_id}/soundpad/items`,
+		data: payload,
+	}))
+	addItem!: (
+		group_id: string,
+		payload: Pick<SoundpadItemPayload, "icon" | "name" | "src">,
+	) => Promise<SoundpadItemPayload>
+
+	/**
+	 * Remove a soundpad item from a group
+	 */
+	@Validate(
+		v.pipe(v.string(), v.minLength(1, "group_id is required")),
+		v.pipe(v.string(), v.minLength(1, "item_id is required")),
+	)
+	@Definition((group_id, item_id) => ({
+		method: "DELETE",
+		url: `/groups/${group_id}/soundpad/items/${item_id}`,
+	}))
+	removeItem!: (
+		group_id: string,
+		item_id: string,
+	) => Promise<{ success: boolean }>
 }
 
 export default new GroupSoundpad()
