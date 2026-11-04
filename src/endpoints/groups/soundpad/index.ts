@@ -28,7 +28,10 @@ class GroupSoundpad extends BaseEndpoint {
 		method: "GET",
 		url: `/groups/${group_id}/soundpad/items/${item_id}`,
 	}))
-	getItem!: (group_id: string, item_id: string) => Promise<SoundpadItemPayload>
+	getItem!: (
+		group_id: string,
+		item_id: string,
+	) => Promise<SoundpadItemPayload>
 
 	/**
 	 * Add a new soundpad item to a group
@@ -49,6 +52,28 @@ class GroupSoundpad extends BaseEndpoint {
 	addItem!: (
 		group_id: string,
 		payload: Pick<SoundpadItemPayload, "icon" | "name" | "src">,
+	) => Promise<SoundpadItemPayload>
+
+	/**
+	 * Edit a soundpad item to a group
+	 */
+	@Validate(
+		v.pipe(v.string(), v.minLength(1, "group_id is required")),
+		v.object({
+			_id: v.pipe(v.string(), v.minLength(1)),
+			icon: v.pipe(v.string(), v.minLength(1)),
+			name: v.pipe(v.string(), v.minLength(1)),
+			src: v.pipe(v.string(), v.minLength(1)),
+		}),
+	)
+	@Definition((group_id, payload) => ({
+		method: "PUT",
+		url: `/groups/${group_id}/soundpad/items/${payload._id}`,
+		data: payload,
+	}))
+	updateItem!: (
+		group_id: string,
+		payload: SoundpadItemPayload,
 	) => Promise<SoundpadItemPayload>
 
 	/**
