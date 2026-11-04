@@ -111,9 +111,7 @@ export class UserModel extends BaseEndpoint {
 
 	@Definition((user_id) => ({
 		method: "GET",
-		url: user_id
-			? `/users/${user_id}/public-key`
-			: "/users/self/public-key",
+		url: user_id ? `/users/${user_id}/public-key` : "/users/self/public-key",
 	}))
 	getPublicKey!: (user_id?: string) => Promise<any>
 
@@ -150,11 +148,11 @@ export class UserModel extends BaseEndpoint {
 	}))
 	getAvatar!: (user_id?: string) => Promise<any>
 
-	@Definition((user_id) => ({
+	@Definition((user_ids) => ({
 		method: "GET",
-		url: `/users/${user_id}/connected`,
+		url: `/users/${Array.isArray(user_ids) ? user_ids.join(",") : user_ids}/is-connected`,
 	}))
-	isUserConnected!: (user_id: string) => Promise<any>
+	isUserConnected!: (user_ids: string | string[]) => Promise<any>
 
 	@Definition((platform) => ({
 		method: "GET",
