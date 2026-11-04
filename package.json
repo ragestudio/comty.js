@@ -1,6 +1,6 @@
 {
 	"name": "comty.js",
-	"version": "1.0.1",
+	"version": "2.3.0",
 	"description": "Official Comty API for JavaScript",
 	"homepage": "https://github.com/ragestudio/comty.js",
 	"author": "RageStudio <support@ragestudio.net>",
@@ -8,9 +8,82 @@
 	"type": "module",
 	"types": "./dist/index.d.ts",
 	"main": "./dist/index.js",
+	"exports": {
+		".": {
+			"react-native": "./src/index.ts",
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./types": {
+			"react-native": "./src/types.ts",
+			"default": "./dist/types.js"
+		},
+		"./client": {
+			"react-native": "./src/core/client.ts",
+			"default": "./dist/core/client.js"
+		},
+		"./session": {
+			"react-native": "./src/core/session.ts",
+			"default": "./dist/core/session.js"
+		},
+		"./storage/*": {
+			"react-native": "./src/core/storage/*.ts",
+			"default": "./dist/core/storage/*.js"
+		},
+		"./storage": {
+			"react-native": "./src/core/storage/storage.ts",
+			"default": "./dist/core/storage/storage.js"
+		},
+		"./remotes": {
+			"react-native": "./src/core/remotes.ts",
+			"default": "./dist/core/remotes.js"
+		},
+		"./auth": {
+			"react-native": "./src/core/auth/index.ts",
+			"default": "./dist/core/auth/index.js"
+		},
+		"./auth/use": {
+			"react-native": "./src/core/auth/use.ts",
+			"default": "./dist/core/auth/use.js"
+		},
+		"./realtime": {
+			"react-native": "./src/core/realtime/index.ts",
+			"default": "./dist/core/realtime/index.js"
+		},
+		"./endpoints/*": {
+			"react-native": "./src/endpoints/*/index.ts",
+			"default": "./dist/endpoints/*/index.js"
+		},
+		"./core/auth": {
+			"react-native": "./src/core/auth/index.ts",
+			"default": "./dist/core/auth/index.js"
+		},
+		"./core/realtime": {
+			"react-native": "./src/core/realtime/index.ts",
+			"default": "./dist/core/realtime/index.js"
+		},
+		"./core/*": {
+			"react-native": "./src/core/*.ts",
+			"types": "./dist/core/*.d.ts",
+			"default": "./dist/core/*.js"
+		},
+		"./hooks/*": {
+			"react-native": "./src/hooks/*/index.ts",
+			"default": "./dist/hooks/*/index.js"
+		},
+		"./utils/*": {
+			"react-native": "./src/utils/*.ts",
+			"default": "./dist/utils/*.js"
+		},
+		"./package.json": "./package.json"
+	},
 	"scripts": {
-		"build": "tsc",
-		"typecheck": "tsc --noEmit"
+		"build": "sh ./scripts/build.sh",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"files": [
 		"dist",
@@ -25,18 +98,20 @@
 	},
 	"dependencies": {
 		"@comty/shared": "workspace:*",
-		"@foxify/events": "^2.1.0",
-		"axios": "^1.20.0",
+		"@linebridge/client": "workspace:*",
+		"axios": "^1.21.0",
 		"js-cookie": "^3.0.8",
-		"jsonwebtoken": "^9.0.3",
 		"jwt-decode": "^4.0.0",
-		"linebridge-client": "workspace:*",
-		"luxon": "^3.7.2",
+		"tseep": "^1.3.1",
 		"valibot": "^1.4.2",
-		"xxhash-wasm": "^1.1.0"
+		"zustand": "^5.0.15"
 	},
 	"devDependencies": {
+		"@types/js-cookie": "^3.0.6",
 		"@types/node": "^26.4.0",
-		"typescript": "^7.0.2"
+		"@types/react": "^19.3.0",
+		"tsc-alias": "^1.9.9",
+		"typescript": "^7.0.2",
+		"vitest": "^4.1.11"
 	}
 }
