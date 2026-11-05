@@ -40,15 +40,11 @@ export class FollowsModel extends BaseEndpoint {
 	 * Toggles the follow status for a user.
 	 */
 	@Validate(v.pipe(v.string(), v.minLength(1, "user_id is required")))
-	@Definition(({ user_id }: { user_id: string }) => ({
+	@Definition((user_id: string) => ({
 		method: "POST",
 		url: `/users/${user_id}/follow`,
 	}))
-	toggleFollow!: ({
-		user_id,
-	}: {
-		user_id: string
-	}) => Promise<Record<string, any>>
+	toggleFollow!: (user_id: string) => Promise<Record<string, any>>
 }
 
 export default new FollowsModel()
