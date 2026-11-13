@@ -60,6 +60,16 @@ export class InventoryModel extends BaseEndpoint {
 	redeem!: (code: string) => Promise<any>
 
 	/**
+	 * Preview a redeem code before redeeming it.
+	 */
+	@Definition((code: string) => ({
+		method: "POST",
+		url: "/redeem/preview",
+		data: { code },
+	}))
+	preview!: (code: string) => Promise<any>
+
+	/**
 	 * Create a redeem code. Requires admin permissions.
 	 */
 	@Definition((payload: any) => ({
