@@ -2,6 +2,8 @@ import type { User } from "@comty/shared/types/user"
 
 import BaseEndpoint from "../../core/endpoint/BaseEndpoint"
 
+import UserSoundpad from "./soundpad"
+
 import * as v from "valibot"
 import { Definition } from "../../core/endpoint/decorators/Definition"
 import { Validate } from "../../core/endpoint/decorators/Validate"
@@ -164,6 +166,7 @@ export class UserModel extends BaseEndpoint {
 
 	decorations = new UserDecorations()
 	badges = new UserBadges()
+	soundpad = UserSoundpad
 }
 
 export class UserDecorations extends BaseEndpoint {
