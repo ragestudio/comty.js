@@ -111,7 +111,9 @@ export class UserModel extends BaseEndpoint {
 
 	@Definition((user_id) => ({
 		method: "GET",
-		url: user_id ? `/users/${user_id}/public-key` : "/users/self/public-key",
+		url: user_id
+			? `/users/${user_id}/public-key`
+			: "/users/self/public-key",
 	}))
 	getPublicKey!: (user_id?: string) => Promise<any>
 
@@ -161,6 +163,7 @@ export class UserModel extends BaseEndpoint {
 	checkVersions!: (platform: string) => Promise<any>
 
 	decorations = new UserDecorations()
+	badges = new UserBadges()
 }
 
 export class UserDecorations extends BaseEndpoint {
@@ -169,6 +172,34 @@ export class UserDecorations extends BaseEndpoint {
 		url: `/users/${user_id}/decorations`,
 	}))
 	get!: (user_id: string) => Promise<any>
+
+	/**
+	 * Update the decorations equipped on the profile.
+	 */
+	@Definition((decorations) => ({
+		method: "PUT",
+		url: "/users/self/decorations",
+		data: { decorations },
+	}))
+	update!: (decorations: Record<string, string | null>) => Promise<any>
+}
+
+export class UserBadges extends BaseEndpoint {
+	@Definition((user_id) => ({
+		method: "GET",
+		url: user_id ? `/users/${user_id}/badges` : "/users/self/badges",
+	}))
+	get!: (user_id?: string) => Promise<any[]>
+
+	/**
+	 * Update the badges displayed on the profile, in order.
+	 */
+	@Definition((profile_badges) => ({
+		method: "PUT",
+		url: "/users/self/badges",
+		data: { profile_badges },
+	}))
+	update!: (profile_badges: string[]) => Promise<any>
 }
 
 export default new UserModel()
